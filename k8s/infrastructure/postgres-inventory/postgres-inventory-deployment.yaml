@@ -23,7 +23,7 @@ spec:
             - name: POSTGRES_PASSWORD
               value: password
             - name: POSTGRES_USER
-              value: ptechie
+              value: taltech
           image: postgres
           name: postgres-inventory
           ports:

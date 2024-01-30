@@ -11,7 +11,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
-    <groupId>com.programming.techie</groupId>
+    <groupId>com.taltech.ecommerce</groupId>
     <artifactId>e-commerce-microservices</artifactId>
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
@@ -65,7 +65,7 @@
                         <image>eclipse-temurin:17.0.4.1_1-jre</image>
                     </from>
                     <to>
-                        <image>microservices-tutorial/${project.artifactId}</image>
+                        <image>taltech-ecommerce/${project.artifactId}</image>
                     </to>
                 </configuration>
                 <executions>

@@ -47,8 +47,6 @@ public class OrderService {
                 .map(OrderLineItems::getSkuCode)
                 .toList();
 
-        // Call Inventory Service, and place order if product is in
-        // stock
         Observation inventoryServiceObservation = Observation.createNotStarted("inventory-service-lookup",
                 this.observationRegistry);
         inventoryServiceObservation.lowCardinalityKeyValue("call", "inventory-service");
@@ -60,12 +58,12 @@ public class OrderService {
                     .bodyToMono(InventoryResponse[].class)
                     .block();
 
-            boolean allProductsInStock = Arrays.stream(inventoryResponseArray)
-                    .allMatch(InventoryResponse::isInStock);
+            boolean allProductsInStock = inventoryResponseArray != null && inventoryResponseArray.length > 0
+                && Arrays.stream(inventoryResponseArray)
+                .allMatch(InventoryResponse::isInStock);
 
             if (allProductsInStock) {
                 orderRepository.save(order);
-                // publish Order Placed Event
                 applicationEventPublisher.publishEvent(new OrderPlacedEvent(this, order.getOrderNumber()));
                 return "Order Placed";
             } else {

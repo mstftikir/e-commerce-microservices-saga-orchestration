@@ -32,7 +32,7 @@ public class OrderController {
     }
 
     public CompletableFuture<String> fallbackMethod(OrderRequest orderRequest, RuntimeException runtimeException) {
-        log.info("Cannot Place Order Executing Fallback logic");
+        log.error("inventory fallbackMethod, orderRequest: {}, exception: {}", orderRequest.toString(), runtimeException.getMessage());
         return CompletableFuture.supplyAsync(() -> "Oops! Something went wrong, please order after some time!");
     }
 }

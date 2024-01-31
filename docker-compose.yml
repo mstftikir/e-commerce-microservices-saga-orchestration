@@ -144,6 +144,10 @@ services:
       - mongo
       - discovery-server
       - api-gateway
+    ports:
+      - "9000:8080"
+    expose:
+      - "9000"
 
   ## Order-Service Docker Compose Config
   order-service:
@@ -158,6 +162,10 @@ services:
       - zipkin
       - discovery-server
       - api-gateway
+    ports:
+      - "9001:8080"
+    expose:
+      - "9001"
 
   ## Inventory-Service Docker Compose Config
   inventory-service:
@@ -170,6 +178,10 @@ services:
       - postgres-inventory
       - discovery-server
       - api-gateway
+    ports:
+      - "9002:8080"
+    expose:
+      - "9002"
 
   ## Notification-Service Docker Compose Config
   notification-service:
@@ -182,6 +194,10 @@ services:
       - broker
       - discovery-server
       - api-gateway
+    ports:
+      - "9003:8080"
+    expose:
+      - "9003"
 
   ## Prometheus
   prometheus:

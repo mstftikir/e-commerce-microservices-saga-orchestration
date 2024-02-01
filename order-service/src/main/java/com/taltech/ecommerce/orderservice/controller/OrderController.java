@@ -32,7 +32,7 @@ public class OrderController {
     }
 
     public CompletableFuture<String> fallbackMethod(OrderRequest orderRequest, RuntimeException runtimeException) {
-        log.error("inventory fallbackMethod, orderRequest: {}, exception: {}", orderRequest.toString(), runtimeException.getMessage());
-        return CompletableFuture.supplyAsync(() -> "Oops! Something went wrong, please order after some time!");
+        log.error("inventory fallbackMethod, orderRequest: {}, exception message: {}", orderRequest.toString(), runtimeException.getMessage());
+        return CompletableFuture.supplyAsync(runtimeException::getMessage);
     }
 }

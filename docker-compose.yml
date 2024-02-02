@@ -1,6 +1,35 @@
 version: '3.7'
 services:
+  ## Mongo Docker Compose Config
+  mongo:
+    container_name: mongo
+    image: mongo:4.4.14-rc0-focal
+    restart: always
+    ports:
+      - "27017:27017"
+    expose:
+      - "27017"
+    volumes:
+      - ./mongo-data:/data/db
+
   ## PostgreSQL Docker Compose Config
+  postgres-user:
+    container_name: postgres-user
+    image: postgres
+    environment:
+      POSTGRES_DB: user-service
+      POSTGRES_USER: taltech
+      POSTGRES_PASSWORD: ecommerce
+      PGDATA: /data/postgres
+    volumes:
+      - ./postgres-user:/data/postgres
+    ports:
+      - "5001:5001"
+    expose:
+      - "5001"
+    command: -p 5001
+    restart: always
+
   postgres-order:
     container_name: postgres-order
     image: postgres
@@ -12,10 +41,10 @@ services:
     volumes:
       - ./postgres-order:/data/postgres
     ports:
-      - "5431:5431"
+      - "5002:5002"
     expose:
-      - "5431"
-    command: -p 5431
+      - "5002"
+    command: -p 5002
     restart: always
 
   postgres-inventory:
@@ -29,10 +58,10 @@ services:
     volumes:
       - ./postgres-inventory:/data/postgres
     ports:
-      - "5432:5432"
+      - "5003:5003"
     expose:
-      - "5432"
-    command: -p 5432
+      - "5003"
+    command: -p 5003
     restart: always
 
   postgres-chart:
@@ -46,23 +75,28 @@ services:
     volumes:
       - ./postgres-chart:/data/postgres
     ports:
-      - "5433:5433"
+      - "5004:5004"
     expose:
-      - "5433"
-    command: -p 5433
+      - "5004"
+    command: -p 5004
     restart: always
 
-  ## Mongo Docker Compose Config
-  mongo:
-    container_name: mongo
-    image: mongo:4.4.14-rc0-focal
-    restart: always
-    ports:
-      - "27017:27017"
-    expose:
-      - "27017"
+  postgres-payment:
+    container_name: postgres-payment
+    image: postgres
+    environment:
+      POSTGRES_DB: payment-service
+      POSTGRES_USER: taltech
+      POSTGRES_PASSWORD: ecommerce
+      PGDATA: /data/postgres
     volumes:
-      - ./mongo-data:/data/db
+      - ./postgres-payment:/data/postgres
+    ports:
+      - "5005:5005"
+    expose:
+      - "5005"
+    command: -p 5004
+    restart: always
 
   ## Keycloak Config with Mysql database
   keycloak-mysql:
@@ -150,14 +184,14 @@ services:
     expose:
       - "8761"
 
-  ## API Gatewey
+  ## API Gateway
   api-gateway:
     image: taltech-ecommerce/api-gateway:latest
     container_name: api-gateway
     profiles: ["services"]
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY= TRACE
+      - LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY=TRACE
     depends_on:
       - zipkin
       - discovery-server
@@ -167,7 +201,7 @@ services:
     expose:
       - "8181"
 
-  ## Product-Service Docker Compose Config
+  ## Product Service Docker Compose Config
   product-service:
     container_name: product-service
     image: taltech-ecommerce/product-service:latest
@@ -179,17 +213,16 @@ services:
       - discovery-server
       - api-gateway
     ports:
-      - "9000:8080"
+      - "7000:8080"
     expose:
-      - "9000"
+      - "7000"
 
-  ## Order-Service Docker Compose Config
-  order-service:
-    container_name: order-service
-    image: taltech-ecommerce/order-service:latest
+  ## User Service Docker Compose Config
+  user-service:
+    container_name: user-service
+    image: taltech-ecommerce/user-service:latest
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-order:5431/order-service
     profiles: ["services"]
     depends_on:
       - postgres-order
@@ -197,40 +230,71 @@ services:
       - discovery-server
       - api-gateway
     ports:
-      - "9001:8080"
+      - "7001:8080"
     expose:
-      - "9001"
+      - "7001"
 
-  ## Inventory-Service Docker Compose Config
+  ## Order Service Docker Compose Config
+  order-service:
+    container_name: order-service
+    image: taltech-ecommerce/order-service:latest
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    profiles: ["services"]
+    depends_on:
+      - postgres-order
+      - zipkin
+      - discovery-server
+      - api-gateway
+    ports:
+      - "7002:8080"
+    expose:
+      - "7002"
+
+  ## Inventory Service Docker Compose Config
   inventory-service:
     container_name: inventory-service
     image: taltech-ecommerce/inventory-service:latest
     profiles: ["services"]
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-inventory:5432/inventory-service
     depends_on:
       - postgres-inventory
       - discovery-server
       - api-gateway
     ports:
-      - "9002:8080"
+      - "7003:8080"
     expose:
-      - "9002"
+      - "7003"
 
-  ## Chart-Service Docker Compose Config
+  ## Chart Service Docker Compose Config
   chart-service:
     container_name: chart-service
     image: taltech-ecommerce/chart-service:latest
     profiles: ["services"]
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-chart:5433/chart-service
     depends_on:
       - postgres-chart
       - discovery-server
       - api-gateway
     ports:
-      - "9004:8080"
+      - "7004:8080"
     expose:
-      - "9004"
+      - "7004"
+
+  ## Payment Service Docker Compose Config
+  payment-service:
+    container_name: payment-service
+    image: taltech-ecommerce/payment-service:latest
+    profiles: ["services"]
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      - postgres-payment
+      - discovery-server
+      - api-gateway
+    ports:
+      - "7005:8080"
+    expose:
+      - "7005"

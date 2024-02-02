@@ -36,8 +36,10 @@ build/
 my-sql-data
 mongo-data
 /mysql_keycloak_data/
+/grafana/
 /postgres/
 /postgres-inventory/
 /postgres-order/
 /postgres-chart/
-/grafana/
+/postgres-user/
+/postgres-payment/

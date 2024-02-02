@@ -12,10 +12,10 @@ services:
       PGDATA: /data/postgres
     volumes:
       - ./postgres-order:/data/postgres
-    expose:
-      - "5431"
     ports:
       - "5431:5431"
+    expose:
+      - "5431"
     command: -p 5431
     restart: always
 
@@ -31,6 +31,26 @@ services:
       - ./postgres-inventory:/data/postgres
     ports:
       - "5432:5432"
+    expose:
+      - "5432"
+    command: -p 5432
+    restart: always
+
+  postgres-chart:
+    container_name: postgres-chart
+    image: postgres
+    environment:
+      POSTGRES_DB: chart-service
+      POSTGRES_USER: taltech
+      POSTGRES_PASSWORD: ecommerce
+      PGDATA: /data/postgres
+    volumes:
+      - ./postgres-chart:/data/postgres
+    ports:
+      - "5433:5433"
+    expose:
+      - "5433"
+    command: -p 5433
     restart: always
 
   ## Mongo Docker Compose Config
@@ -223,3 +243,19 @@ services:
       - "9003:8080"
     expose:
       - "9003"
+
+  ## Chart-Service Docker Compose Config
+  chart-service:
+    container_name: chart-service
+    image: taltech-ecommerce/chart-service:latest
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-chart:5433/chart-service
+    depends_on:
+      - postgres-chart
+      - discovery-server
+      - api-gateway
+    ports:
+      - "9004:8080"
+    expose:
+      - "9004"

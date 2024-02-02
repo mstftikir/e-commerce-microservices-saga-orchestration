@@ -39,4 +39,5 @@ mongo-data
 /postgres/
 /postgres-inventory/
 /postgres-order/
+/postgres-chart/
 /grafana/

@@ -95,7 +95,7 @@ services:
       - "5005:5005"
     expose:
       - "5005"
-    command: -p 5004
+    command: -p 5005
     restart: always
 
   ## Keycloak Config with Mysql database
@@ -174,7 +174,6 @@ services:
   discovery-server:
     image: taltech-ecommerce/discovery-server:latest
     container_name: discovery-server
-    profiles: ["services"]
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
@@ -188,7 +187,6 @@ services:
   api-gateway:
     image: taltech-ecommerce/api-gateway:latest
     container_name: api-gateway
-    profiles: ["services"]
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY=TRACE
@@ -205,7 +203,6 @@ services:
   product-service:
     container_name: product-service
     image: taltech-ecommerce/product-service:latest
-    profiles: ["services"]
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
@@ -222,8 +219,7 @@ services:
     container_name: user-service
     image: taltech-ecommerce/user-service:latest
     environment:
-      - SPRING_PROFILES_ACTIVE=docker
-    profiles: ["services"]
+      - SPRING_PROFILES_ACTIVE=dockerx
     depends_on:
       - postgres-order
       - zipkin
@@ -240,7 +236,6 @@ services:
     image: taltech-ecommerce/order-service:latest
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-    profiles: ["services"]
     depends_on:
       - postgres-order
       - zipkin
@@ -255,7 +250,6 @@ services:
   inventory-service:
     container_name: inventory-service
     image: taltech-ecommerce/inventory-service:latest
-    profiles: ["services"]
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
@@ -271,7 +265,6 @@ services:
   chart-service:
     container_name: chart-service
     image: taltech-ecommerce/chart-service:latest
-    profiles: ["services"]
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
@@ -287,7 +280,6 @@ services:
   payment-service:
     container_name: payment-service
     image: taltech-ecommerce/payment-service:latest
-    profiles: ["services"]
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:

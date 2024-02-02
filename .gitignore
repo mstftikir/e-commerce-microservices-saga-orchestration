@@ -33,13 +33,15 @@ build/
 .vscode/
 
 ### My SQL Host Data ###
-my-sql-data
 mongo-data
 /mysql_keycloak_data/
 /grafana/
+/opt/sonarCE/
+/sonarqube/
 /postgres/
 /postgres-inventory/
 /postgres-order/
 /postgres-chart/
 /postgres-user/
 /postgres-payment/
+/postgres-sonar/

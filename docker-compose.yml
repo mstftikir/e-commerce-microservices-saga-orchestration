@@ -253,7 +253,7 @@ services:
     container_name: user-service
     image: taltech-ecommerce/user-service:latest
     environment:
-      - SPRING_PROFILES_ACTIVE=dockerx
+      - SPRING_PROFILES_ACTIVE=docker
     depends_on:
       - postgres-order
       - zipkin

@@ -10,7 +10,10 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.csrf().ignoringRequestMatchers("/eureka/**");
+        httpSecurity.csrf(AbstractHttpConfigurer::disable)
+            .authorizeHttpRequests(registry ->
+                registry.requestMatchers("/eureka/**").permitAll()
+                    .requestMatchers("/").permitAll());
         return httpSecurity.build();
     }
 }

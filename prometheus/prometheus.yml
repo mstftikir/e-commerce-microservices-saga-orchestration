@@ -21,9 +21,9 @@ scrape_configs:
       - targets: ['inventory-service:8080']
         labels:
           application: 'Inventory Service Application'
-  - job_name: 'notification-service'
+  - job_name: 'chart-service'
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: ['notification-service:8080']
+      - targets: ['chart-service:8080']
         labels:
-          application: 'Notification Service Application'
+          application: 'Chart Service Application'

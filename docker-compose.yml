@@ -1,4 +1,3 @@
----
 version: '3.7'
 services:
   ## PostgreSQL Docker Compose Config
@@ -91,35 +90,12 @@ services:
       KEYCLOAK_ADMIN_PASSWORD: admin
     ports:
       - "8080:8080"
+    expose:
+      - "8080"
     volumes:
       - ./realms/:/opt/keycloak/data/import/
     depends_on:
       - keycloak-mysql
-
-  zookeeper:
-    image: confluentinc/cp-zookeeper:7.0.1
-    container_name: zookeeper
-    ports:
-      - "2181:2181"
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-
-  broker:
-    image: confluentinc/cp-kafka:7.0.1
-    container_name: broker
-    ports:
-      - "9092:9092"
-    depends_on:
-      - zookeeper
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://broker:29092
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
 
   ## Zipkin
   zipkin:
@@ -127,6 +103,8 @@ services:
     container_name: zipkin
     ports:
       - "9411:9411"
+    expose:
+      - "9411"
 
   ## Prometheus
   prometheus:
@@ -135,15 +113,16 @@ services:
     restart: always
     ports:
       - "9090:9090"
+    expose:
+      - "9090"
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
 
+  ## Grafana
   grafana:
     image: grafana/grafana-oss:8.5.2
     container_name: grafana
     restart: always
-    ports:
-      - "3000:3000"
     links:
       - prometheus:prometheus
     volumes:
@@ -151,26 +130,31 @@ services:
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=password
+    ports:
+      - "3000:3000"
+    expose:
+      - "3000"
 
-
+  ## E-Commerce Microservices
   ## Eureka Server
   discovery-server:
     image: taltech-ecommerce/discovery-server:latest
     container_name: discovery-server
-    ports:
-      - "8761:8761"
+    profiles: ["services"]
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
       - zipkin
+    ports:
+      - "8761:8761"
+    expose:
+      - "8761"
 
+  ## API Gatewey
   api-gateway:
     image: taltech-ecommerce/api-gateway:latest
     container_name: api-gateway
-    ports:
-      - "8181:8080"
-    expose:
-      - "8181"
+    profiles: ["services"]
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY= TRACE
@@ -178,11 +162,16 @@ services:
       - zipkin
       - discovery-server
       - keycloak
+    ports:
+      - "8181:8080"
+    expose:
+      - "8181"
 
   ## Product-Service Docker Compose Config
   product-service:
     container_name: product-service
     image: taltech-ecommerce/product-service:latest
+    profiles: ["services"]
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
@@ -201,9 +190,9 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-order:5431/order-service
+    profiles: ["services"]
     depends_on:
       - postgres-order
-      - broker
       - zipkin
       - discovery-server
       - api-gateway
@@ -216,6 +205,7 @@ services:
   inventory-service:
     container_name: inventory-service
     image: taltech-ecommerce/inventory-service:latest
+    profiles: ["services"]
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-inventory:5432/inventory-service
@@ -228,26 +218,11 @@ services:
     expose:
       - "9002"
 
-  ## Notification-Service Docker Compose Config
-  notification-service:
-    container_name: notification-service
-    image: taltech-ecommerce/notification-service:latest
-    environment:
-      - SPRING_PROFILES_ACTIVE=docker
-    depends_on:
-      - zipkin
-      - broker
-      - discovery-server
-      - api-gateway
-    ports:
-      - "9003:8080"
-    expose:
-      - "9003"
-
   ## Chart-Service Docker Compose Config
   chart-service:
     container_name: chart-service
     image: taltech-ecommerce/chart-service:latest
+    profiles: ["services"]
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-chart:5433/chart-service

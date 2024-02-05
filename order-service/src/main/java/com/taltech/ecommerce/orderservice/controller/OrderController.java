@@ -7,7 +7,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.taltech.ecommerce.orderservice.dto.OrderRequest;
+import com.taltech.ecommerce.orderservice.dto.OrderDto;
+import com.taltech.ecommerce.orderservice.mapper.OrderMapper;
 import com.taltech.ecommerce.orderservice.service.OrderService;
 
 import lombok.RequiredArgsConstructor;
@@ -20,11 +21,13 @@ import lombok.extern.slf4j.Slf4j;
 public class OrderController {
 
     private final OrderService orderService;
+    private final OrderMapper orderMapper;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public String placeOrder(@RequestBody OrderRequest orderRequest) {
-        log.info("Placing Order");
-        return orderService.placeOrder(orderRequest);
+    public String placeOrder(@RequestBody OrderDto orderDto) {
+        log.info("Placing Order: {}", orderDto);
+
+        return orderService.placeOrder(orderMapper.toModel(orderDto));
     }
 }

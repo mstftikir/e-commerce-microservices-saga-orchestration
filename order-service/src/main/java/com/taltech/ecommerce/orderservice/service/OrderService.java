@@ -1,23 +1,22 @@
 package com.taltech.ecommerce.orderservice.service;
 
-import com.taltech.ecommerce.orderservice.dto.InventoryResponse;
-import com.taltech.ecommerce.orderservice.dto.OrderLineItemsDto;
-import com.taltech.ecommerce.orderservice.dto.OrderRequest;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.reactive.function.client.WebClient;
+
+import com.taltech.ecommerce.orderservice.dto.InventoryDto;
 import com.taltech.ecommerce.orderservice.model.Order;
-import com.taltech.ecommerce.orderservice.model.OrderLineItems;
+import com.taltech.ecommerce.orderservice.model.OrderLineItem;
 import com.taltech.ecommerce.orderservice.repository.OrderRepository;
 
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.reactive.function.client.WebClient;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -29,35 +28,27 @@ public class OrderService {
     private final WebClient.Builder webClientBuilder;
     private final ObservationRegistry observationRegistry;
 
-    public String placeOrder(OrderRequest orderRequest) {
-        Order order = new Order();
+    public String placeOrder(Order order) {
         order.setOrderNumber(UUID.randomUUID().toString());
 
-        List<OrderLineItems> orderLineItems = orderRequest.getOrderLineItemsDtoList()
-                .stream()
-                .map(this::mapToDto)
-                .toList();
-
-        order.setOrderLineItemsList(orderLineItems);
-
-        List<String> skuCodes = order.getOrderLineItemsList().stream()
-                .map(OrderLineItems::getSkuCode)
+        List<String> skuCodes = order.getOrderLineItems().stream()
+                .map(OrderLineItem::getSkuCode)
                 .toList();
 
         Observation inventoryServiceObservation = Observation.createNotStarted("inventory-service-lookup",
                 this.observationRegistry);
         inventoryServiceObservation.lowCardinalityKeyValue("call", "inventory-service");
         return inventoryServiceObservation.observe(() -> {
-            InventoryResponse[] inventoryResponseArray = webClientBuilder.build().get()
+            InventoryDto[] inventoryDtoArray = webClientBuilder.build().get()
                     .uri("http://inventory-service/api/inventory",
                             uriBuilder -> uriBuilder.queryParam("skuCode", skuCodes).build())
                     .retrieve()
-                    .bodyToMono(InventoryResponse[].class)
+                    .bodyToMono(InventoryDto[].class)
                     .block();
 
-            boolean allProductsInStock = inventoryResponseArray != null && inventoryResponseArray.length > 0
-                && Arrays.stream(inventoryResponseArray)
-                .allMatch(InventoryResponse::isInStock);
+            boolean allProductsInStock = inventoryDtoArray != null && inventoryDtoArray.length > 0
+                && Arrays.stream(inventoryDtoArray)
+                .allMatch(InventoryDto::isInStock);
 
             if (allProductsInStock) {
                 orderRepository.save(order);
@@ -67,13 +58,5 @@ public class OrderService {
             }
         });
 
-    }
-
-    private OrderLineItems mapToDto(OrderLineItemsDto orderLineItemsDto) {
-        OrderLineItems orderLineItems = new OrderLineItems();
-        orderLineItems.setPrice(orderLineItemsDto.getPrice());
-        orderLineItems.setQuantity(orderLineItemsDto.getQuantity());
-        orderLineItems.setSkuCode(orderLineItemsDto.getSkuCode());
-        return orderLineItems;
     }
 }

@@ -1,6 +1,6 @@
 package com.taltech.ecommerce.inventoryservice.controller;
 
-import com.taltech.ecommerce.inventoryservice.dto.InventoryResponse;
+import com.taltech.ecommerce.inventoryservice.dto.InventoryDto;
 import com.taltech.ecommerce.inventoryservice.service.InventoryService;
 
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ public class InventoryController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<InventoryResponse> isInStock(@RequestParam List<String> skuCode) {
+    public List<InventoryDto> isInStock(@RequestParam List<String> skuCode) {
         log.info("Received inventory check request for skuCode: {}", skuCode);
         return inventoryService.isInStock(skuCode);
     }

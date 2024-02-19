@@ -6,10 +6,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import jakarta.persistence.*;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Table(name = "t_charts")
+@Table
 @Getter
 @Setter
 @AllArgsConstructor
@@ -18,6 +21,10 @@ public class Chart {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private Long userId;
     @OneToMany(cascade = CascadeType.ALL)
-    private List<ChartLineItem> chartLineItems;
+    private List<ChartItem> chartItems;
+    private BigDecimal totalPrice;
+    private LocalDateTime insertDate;
+    private LocalDateTime updateDate;
 }

@@ -1,10 +1,12 @@
 package com.taltech.ecommerce.chartservice.service;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
+import com.taltech.ecommerce.chartservice.exception.ChartDeleteException;
+import com.taltech.ecommerce.chartservice.model.Chart;
 import com.taltech.ecommerce.chartservice.repository.ChartRepository;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -13,16 +15,22 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ChartService {
 
-    private final ChartRepository chartRepository;
+    private final ChartRepository repository;
 
-    public boolean deleteById(Long id) {
-        try{
-            chartRepository.deleteById(id);
-            return true;
+    public void deleteByUserId(Long userId) {
+        log.info("Checking chart by userId '{}'", userId);
+        Chart chart = repository.findByUserId(userId)
+            .orElseThrow(() -> new EntityNotFoundException(String.format("Chart with userId '%s' not found", userId)));
+
+        log.info("Deleting chart by id '{}'", chart.getId());
+        try {
+            repository.deleteById(chart.getId());
         }
-        catch (Exception ex) {
-            log.error("Error deleting chart by id: {}, exception: {}", id, ex.getMessage());
-            return false;
+        catch (Exception exception) {
+            throw new ChartDeleteException(String.format("Exception happened while deleting the chart with id '%s' and userId '%s'. Exception message: '%s'",
+                chart.getId(),
+                chart.getUserId(),
+                exception.getMessage()));
         }
     }
 }

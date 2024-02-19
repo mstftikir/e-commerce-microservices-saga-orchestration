@@ -1,13 +1,14 @@
 package com.taltech.ecommerce.chartservice.util;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import com.taltech.ecommerce.chartservice.model.Chart;
-import com.taltech.ecommerce.chartservice.model.ChartLineItem;
+import com.taltech.ecommerce.chartservice.model.ChartItem;
 import com.taltech.ecommerce.chartservice.repository.ChartRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -19,30 +20,50 @@ public class DataLoader implements CommandLineRunner {
     @Override
     public void run(String... args) {
         if (chartRepository.count() < 2) {
-            Chart chart = new Chart();
-            ChartLineItem chartLineItem = new ChartLineItem();
-            chartLineItem.setPrice(BigDecimal.ONE);
-            chartLineItem.setQuantity(1);
-            chartLineItem.setSkuCode("sku-code-1");
+            // Chart 1
+            ChartItem chartItem = new ChartItem();
+            chartItem.setInventoryCode("iphone_13");
+            chartItem.setPrice(new BigDecimal(1000));
+            chartItem.setQuantity(1);
+            chartItem.setInsertDate(LocalDateTime.now());
+            chartItem.setUpdateDate(LocalDateTime.now());
 
-            ChartLineItem chartLineItem2 = new ChartLineItem();
-            chartLineItem2.setPrice(BigDecimal.TEN);
-            chartLineItem2.setQuantity(2);
-            chartLineItem2.setSkuCode("sku-code-2");
-            chart.setChartLineItems(List.of(chartLineItem, chartLineItem2));
+            ChartItem chartItem2 = new ChartItem();
+            chartItem2.setInventoryCode("samsung_a12");
+            chartItem2.setPrice(new BigDecimal(800));
+            chartItem2.setQuantity(1);
+            chartItem2.setInsertDate(LocalDateTime.now());
+            chartItem2.setUpdateDate(LocalDateTime.now());
+
+            Chart chart = new Chart();
+            chart.setUserId(12345L);
+            chart.setChartItems(List.of(chartItem, chartItem2));
+            chart.setTotalPrice(new BigDecimal(1800));
+            chart.setInsertDate(LocalDateTime.now());
+            chart.setUpdateDate(LocalDateTime.now());
             chartRepository.save(chart);
 
-            Chart chart2 = new Chart();
-            ChartLineItem chartLineItem3 = new ChartLineItem();
-            chartLineItem3.setPrice(BigDecimal.ONE);
-            chartLineItem3.setQuantity(3);
-            chartLineItem3.setSkuCode("sku-code-3");
+            // Chart 2
+            ChartItem chartItem3 = new ChartItem();
+            chartItem3.setInventoryCode("iphone_13");
+            chartItem3.setPrice(new BigDecimal(1000));
+            chartItem3.setQuantity(2);
+            chartItem3.setInsertDate(LocalDateTime.now());
+            chartItem3.setUpdateDate(LocalDateTime.now());
 
-            ChartLineItem chartLineItem4 = new ChartLineItem();
-            chartLineItem4.setPrice(BigDecimal.TEN);
-            chartLineItem4.setQuantity(4);
-            chartLineItem4.setSkuCode("sku-code-4");
-            chart2.setChartLineItems(List.of(chartLineItem3, chartLineItem4));
+            ChartItem chartItem4 = new ChartItem();
+            chartItem4.setInventoryCode("samsung_a12");
+            chartItem4.setPrice(new BigDecimal(800));
+            chartItem4.setQuantity(2);
+            chartItem4.setInsertDate(LocalDateTime.now());
+            chartItem4.setUpdateDate(LocalDateTime.now());
+
+            Chart chart2 = new Chart();
+            chart2.setUserId(67890L);
+            chart2.setChartItems(List.of(chartItem3, chartItem4));
+            chart2.setTotalPrice(new BigDecimal(3600));
+            chart2.setInsertDate(LocalDateTime.now());
+            chart2.setUpdateDate(LocalDateTime.now());
             chartRepository.save(chart2);
         }
     }

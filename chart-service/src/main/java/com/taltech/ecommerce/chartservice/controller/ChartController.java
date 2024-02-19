@@ -20,11 +20,11 @@ public class ChartController {
 
     private final ChartService chartService;
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{userId}")
     @ResponseStatus(HttpStatus.OK)
-    public boolean deleteById(@PathVariable("id") Long id) {
-        log.info("Received chart deletion request by id: {}", id);
-        return chartService.deleteById(id);
+    public void deleteByUserId(@PathVariable("userId") Long userId) {
+        log.info("Received chart deletion request by userId: {}", userId);
+        chartService.deleteByUserId(userId);
     }
 }
 

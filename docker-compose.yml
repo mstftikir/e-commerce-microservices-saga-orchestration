@@ -1,16 +1,5 @@
 version: '3.7'
 services:
-  ## Mongo Docker Compose Config
-  mongo:
-    container_name: mongo
-    image: mongo:4.4.14-rc0-focal
-    restart: always
-    ports:
-      - "27017:27017"
-    expose:
-      - "27017"
-    volumes:
-      - ./mongo-data:/data/db
 
   ## PostgreSQL Docker Compose Config
   postgres-user:
@@ -235,22 +224,6 @@ services:
       - "8181:8080"
     expose:
       - "8181"
-
-  ## Product Service Docker Compose Config
-  product-service:
-    container_name: product-service
-    image: taltech-ecommerce/product-service:latest
-    profiles: ["services"]
-    environment:
-      - SPRING_PROFILES_ACTIVE=docker
-    depends_on:
-      - mongo
-      - discovery-server
-      - api-gateway
-    ports:
-      - "7000:8080"
-    expose:
-      - "7000"
 
   ## User Service Docker Compose Config
   user-service:

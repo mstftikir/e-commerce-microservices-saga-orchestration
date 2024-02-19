@@ -32,11 +32,10 @@ build/
 ### VS Code ###
 .vscode/
 
-### My SQL Host Data ###
-mongo-data
+### Data ###
 /mysql_keycloak_data/
 /grafana/
-/opt/sonarCE/
+/opt/
 /sonarqube/
 /postgres/
 /postgres-inventory/

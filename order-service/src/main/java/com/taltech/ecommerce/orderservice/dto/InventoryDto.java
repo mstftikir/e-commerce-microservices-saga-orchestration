@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class InventoryDto {
-    private String skuCode;
+    private String code;
     private boolean isInStock;
 }

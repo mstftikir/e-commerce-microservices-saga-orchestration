@@ -6,10 +6,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import jakarta.persistence.*;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Table(name = "t_orders")
+@Table(name = "t_order")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -18,7 +21,10 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String orderNumber;
+    private Long userId;
     @OneToMany(cascade = CascadeType.ALL)
-    private List<OrderLineItem> orderLineItems;
+    private List<OrderItem> orderItems;
+    private BigDecimal totalPrice;
+    private LocalDateTime insertDate;
+    private LocalDateTime updateDate;
 }

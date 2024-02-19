@@ -8,4 +8,5 @@ import com.taltech.ecommerce.orderservice.model.Order;
 @Mapper(componentModel = "spring")
 public interface OrderMapper {
     Order toModel(OrderDto dto);
+    OrderDto toDto(Order model);
 }

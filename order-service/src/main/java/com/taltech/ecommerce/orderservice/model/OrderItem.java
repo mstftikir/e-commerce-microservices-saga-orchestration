@@ -7,18 +7,21 @@ import lombok.Setter;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "t_order_line_items")
+@Table
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrderLineItem {
+public class OrderItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String skuCode;
-    private BigDecimal price;
+    private String inventoryCode;
     private Integer quantity;
+    private BigDecimal price;
+    private LocalDateTime insertDate;
+    private LocalDateTime updateDate;
 }

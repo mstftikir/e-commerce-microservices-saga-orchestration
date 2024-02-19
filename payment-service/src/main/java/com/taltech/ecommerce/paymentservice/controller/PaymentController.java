@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.taltech.ecommerce.paymentservice.dto.PaymentDto;
 import com.taltech.ecommerce.paymentservice.mapper.PaymentMapper;
+import com.taltech.ecommerce.paymentservice.model.Payment;
 import com.taltech.ecommerce.paymentservice.service.PaymentService;
 
 import lombok.RequiredArgsConstructor;
@@ -27,7 +28,10 @@ public class PaymentController {
     @ResponseStatus(HttpStatus.CREATED)
     public PaymentDto save(@RequestBody PaymentDto paymentDto) {
         log.info("Received payment dto fo saving: {}", paymentDto);
-        return paymentMapper.toDto(paymentService.save(paymentMapper.toModel(paymentDto)));
+
+        Payment paymentModel = paymentMapper.toModel(paymentDto);
+        Payment savedPayment = paymentService.save(paymentModel);
+        return paymentMapper.toDto(savedPayment);
     }
 }
 

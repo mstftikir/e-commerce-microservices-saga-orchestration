@@ -1,13 +1,14 @@
 package com.taltech.ecommerce.paymentservice.util;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import com.taltech.ecommerce.paymentservice.model.Payment;
-import com.taltech.ecommerce.paymentservice.model.PaymentLineItem;
+import com.taltech.ecommerce.paymentservice.model.PaymentItem;
 import com.taltech.ecommerce.paymentservice.repository.PaymentRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -19,30 +20,50 @@ public class DataLoader implements CommandLineRunner {
     @Override
     public void run(String... args) {
         if (paymentRepository.count() < 2) {
-            Payment payment = new Payment();
-            PaymentLineItem paymentLineItem = new PaymentLineItem();
-            paymentLineItem.setPrice(BigDecimal.ONE);
-            paymentLineItem.setQuantity(1);
-            paymentLineItem.setSkuCode("sku-code-1");
+            //Payment 1
+            PaymentItem paymentItem = new PaymentItem();
+            paymentItem.setInventoryCode("iphone_13");
+            paymentItem.setPrice(new BigDecimal(1000));
+            paymentItem.setQuantity(1);
+            paymentItem.setInsertDate(LocalDateTime.now());
+            paymentItem.setUpdateDate(LocalDateTime.now());
 
-            PaymentLineItem paymentLineItem2 = new PaymentLineItem();
-            paymentLineItem2.setPrice(BigDecimal.TEN);
-            paymentLineItem2.setQuantity(2);
-            paymentLineItem2.setSkuCode("sku-code-2");
-            payment.setPaymentLineItems(List.of(paymentLineItem, paymentLineItem2));
+            PaymentItem paymentItem2 = new PaymentItem();
+            paymentItem2.setInventoryCode("samsung_a12");
+            paymentItem2.setPrice(new BigDecimal(800));
+            paymentItem2.setQuantity(1);
+            paymentItem2.setInsertDate(LocalDateTime.now());
+            paymentItem2.setUpdateDate(LocalDateTime.now());
+
+            Payment payment = new Payment();
+            payment.setUserId(12345L);
+            payment.setPaymentItems(List.of(paymentItem, paymentItem2));
+            payment.setTotalPrice(new BigDecimal(1800));
+            payment.setInsertDate(LocalDateTime.now());
+            payment.setUpdateDate(LocalDateTime.now());
             paymentRepository.save(payment);
 
-            Payment payment2 = new Payment();
-            PaymentLineItem paymentLineItem3 = new PaymentLineItem();
-            paymentLineItem3.setPrice(BigDecimal.ONE);
-            paymentLineItem3.setQuantity(3);
-            paymentLineItem3.setSkuCode("sku-code-3");
+            //Payment 2
+            PaymentItem paymentItem3 = new PaymentItem();
+            paymentItem3.setInventoryCode("iphone_13");
+            paymentItem3.setPrice(new BigDecimal(1000));
+            paymentItem3.setQuantity(2);
+            paymentItem3.setInsertDate(LocalDateTime.now());
+            paymentItem3.setUpdateDate(LocalDateTime.now());
 
-            PaymentLineItem paymentLineItem4 = new PaymentLineItem();
-            paymentLineItem4.setPrice(BigDecimal.TEN);
-            paymentLineItem4.setQuantity(4);
-            paymentLineItem4.setSkuCode("sku-code-4");
-            payment2.setPaymentLineItems(List.of(paymentLineItem3, paymentLineItem4));
+            PaymentItem paymentItem4 = new PaymentItem();
+            paymentItem4.setInventoryCode("samsung_a12");
+            paymentItem4.setPrice(new BigDecimal(800));
+            paymentItem4.setQuantity(2);
+            paymentItem4.setInsertDate(LocalDateTime.now());
+            paymentItem4.setUpdateDate(LocalDateTime.now());
+
+            Payment payment2 = new Payment();
+            payment2.setUserId(67890L);
+            payment2.setPaymentItems(List.of(paymentItem3, paymentItem4));
+            payment2.setTotalPrice(new BigDecimal(3600));
+            payment2.setInsertDate(LocalDateTime.now());
+            payment2.setUpdateDate(LocalDateTime.now());
             paymentRepository.save(payment2);
         }
     }

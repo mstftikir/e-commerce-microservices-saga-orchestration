@@ -1,6 +1,7 @@
 package com.taltech.ecommerce.paymentservice.model;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -13,16 +14,18 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "t_payment_line_items")
+@Table
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class PaymentLineItem {
+public class PaymentItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String skuCode;
-    private BigDecimal price;
+    private String inventoryCode;
     private Integer quantity;
+    private BigDecimal price;
+    private LocalDateTime insertDate;
+    private LocalDateTime updateDate;
 }

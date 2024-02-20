@@ -22,27 +22,27 @@ public class ChartController {
 
     private static final String RECEIVED_INFO_LOG = "{} - Received request by userId: {}";
 
-    private final ChartService chartService;
+    private final ChartService service;
 
     @GetMapping("/{userId}/prepare")
     @ResponseStatus(HttpStatus.OK)
     public void prepareDeleteByUserId(@PathVariable("userId") Long userId) {
         log.info(RECEIVED_INFO_LOG, "Prepare", userId);
-        chartService.prepareDeleteByUserId(userId);
+        service.prepareDeleteByUserId(userId);
     }
 
     @DeleteMapping("/{userId}/commit")
     @ResponseStatus(HttpStatus.OK)
     public void commitDeleteByUserId(@PathVariable("userId") Long userId) {
         log.info(RECEIVED_INFO_LOG, "Commit", userId);
-        chartService.commitDeleteByUserId(userId);
+        service.commitDeleteByUserId(userId);
     }
 
     @PutMapping("/{userId}/rollback")
     @ResponseStatus(HttpStatus.OK)
     public void rollbackDeleteByUserId(@PathVariable("userId") Long userId) {
         log.info(RECEIVED_INFO_LOG, "Rollback", userId);
-        chartService.rollbackDeleteByUserId(userId);
+        service.rollbackDeleteByUserId(userId);
     }
 }
 

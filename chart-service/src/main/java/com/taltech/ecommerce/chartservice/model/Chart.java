@@ -25,6 +25,7 @@ public class Chart {
     @OneToMany(cascade = CascadeType.ALL)
     private List<ChartItem> chartItems;
     private BigDecimal totalPrice;
+    private boolean active;
     private LocalDateTime insertDate;
     private LocalDateTime updateDate;
 }

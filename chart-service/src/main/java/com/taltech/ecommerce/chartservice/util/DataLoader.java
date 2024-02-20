@@ -24,6 +24,7 @@ public class DataLoader implements CommandLineRunner {
             chartItem.setInventoryCode("iphone_13");
             chartItem.setPrice(new BigDecimal(1000));
             chartItem.setQuantity(1);
+            chartItem.setActive(true);
             chartItem.setInsertDate(LocalDateTime.now());
             chartItem.setUpdateDate(LocalDateTime.now());
 
@@ -31,6 +32,7 @@ public class DataLoader implements CommandLineRunner {
             chartItem2.setInventoryCode("samsung_a12");
             chartItem2.setPrice(new BigDecimal(800));
             chartItem2.setQuantity(1);
+            chartItem2.setActive(true);
             chartItem2.setInsertDate(LocalDateTime.now());
             chartItem2.setUpdateDate(LocalDateTime.now());
 
@@ -38,6 +40,7 @@ public class DataLoader implements CommandLineRunner {
             chart.setUserId(12345L);
             chart.setChartItems(List.of(chartItem, chartItem2));
             chart.setTotalPrice(new BigDecimal(1800));
+            chart.setActive(true);
             chart.setInsertDate(LocalDateTime.now());
             chart.setUpdateDate(LocalDateTime.now());
             chartRepository.save(chart);

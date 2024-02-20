@@ -26,6 +26,7 @@ public class PaymentItem {
     private String inventoryCode;
     private Integer quantity;
     private BigDecimal price;
+    private boolean active;
     private LocalDateTime insertDate;
     private LocalDateTime updateDate;
 }

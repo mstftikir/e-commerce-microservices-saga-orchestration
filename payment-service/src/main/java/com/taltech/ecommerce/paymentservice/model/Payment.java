@@ -24,10 +24,12 @@ public class Payment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private String code;
     private Long userId;
     @OneToMany(cascade = CascadeType.ALL)
     private List<PaymentItem> paymentItems;
     private BigDecimal totalPrice;
+    private boolean active;
     private LocalDateTime insertDate;
     private LocalDateTime updateDate;
 }

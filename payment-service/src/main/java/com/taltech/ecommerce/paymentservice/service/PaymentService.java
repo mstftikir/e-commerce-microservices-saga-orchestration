@@ -4,12 +4,15 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.hibernate.exception.GenericJDBCException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.taltech.ecommerce.paymentservice.exception.PaymentSaveException;
 import com.taltech.ecommerce.paymentservice.model.Payment;
 import com.taltech.ecommerce.paymentservice.repository.PaymentRepository;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -18,40 +21,74 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class PaymentService {
 
-    private final PaymentRepository paymentRepository;
+    private final PaymentRepository repository;
 
-    public Payment save(Payment payment) {
-        log.info("Saving the payment for userId '{}' and totalPrice '{}'",
+    @Transactional(readOnly = true)
+    public Payment prepareSave(Payment payment) {
+        return savePayment("Prepare", payment);
+    }
+
+    @Transactional
+    public Payment commitSave(Payment payment) {
+        return savePayment("Commit", payment);
+    }
+
+    @Transactional
+    public Payment rollbackSave(Payment payment) {
+        return savePayment("Rollback", payment);
+    }
+
+    private Payment savePayment(String action, Payment payment) {
+        log.info("{} - Saving the payment for userId '{}' and code '{}'",
+            action,
             payment.getUserId(),
-            payment.getTotalPrice());
+            payment.getCode());
 
-        Payment calculatedPayment = calculateTotalPrice(payment);
-        addDates(calculatedPayment);
+        boolean rollback = action.equals("Rollback");
+
+        if(rollback) {
+            String paymentCode = payment.getCode();
+            payment = repository.findByCode(payment.getCode()).orElseThrow(() ->
+                new EntityNotFoundException(String.format("%s - Payment with code '%s' not found",
+                    action,
+                    paymentCode)));
+        }
+        else{
+            calculateTotalPrice(payment);
+        }
+        setPaymentActive(payment, !rollback);
+        setPaymentUpdateDates(payment);
 
         try {
-            return paymentRepository.save(calculatedPayment);
+            return repository.save(payment);
         }
         catch (Exception exception) {
-            throw new PaymentSaveException(String.format("Payment save failed for userId '%s' and totalPrice '%s'",
+            GenericJDBCException jdbcException = (GenericJDBCException) exception.getCause();
+            // Insert not allowed in readonly transaction
+            if(jdbcException.getSQLState().equals("25006")) {
+                return payment;
+            }
+
+            throw new PaymentSaveException(String.format("%s - Payment save failed for userId '%s' and code '%s'",
+                action,
                 payment.getUserId(),
-                payment.getTotalPrice()));
+                payment.getCode()));
         }
     }
 
-    private Payment calculateTotalPrice(Payment payment) {
+    private void setPaymentActive(Payment payment, boolean active) {
+        payment.setActive(active);
+        payment.getPaymentItems().forEach(paymentItem -> paymentItem.setActive(true));
+    }
+
+    private void calculateTotalPrice(Payment payment) {
         AtomicReference<BigDecimal> totalPrice = new AtomicReference<>(BigDecimal.ZERO);
         payment.getPaymentItems().forEach(paymentItem -> totalPrice.updateAndGet(t -> t.add(paymentItem.getPrice().multiply(new BigDecimal(paymentItem.getQuantity())))));
         payment.setTotalPrice(totalPrice.get());
-        return payment;
     }
 
-    private void addDates(Payment payment) {
-        payment.setInsertDate(LocalDateTime.now());
+    private void setPaymentUpdateDates(Payment payment) {
         payment.setUpdateDate(LocalDateTime.now());
-
-        payment.getPaymentItems().forEach(paymentItem -> {
-            paymentItem.setInsertDate(LocalDateTime.now());
-            paymentItem.setUpdateDate(LocalDateTime.now());
-        });
+        payment.getPaymentItems().forEach(paymentItem -> paymentItem.setUpdateDate(LocalDateTime.now()));
     }
 }

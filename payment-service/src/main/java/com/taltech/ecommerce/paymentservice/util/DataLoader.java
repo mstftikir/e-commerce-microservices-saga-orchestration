@@ -3,6 +3,7 @@ package com.taltech.ecommerce.paymentservice.util;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -36,9 +37,11 @@ public class DataLoader implements CommandLineRunner {
             paymentItem2.setUpdateDate(LocalDateTime.now());
 
             Payment payment = new Payment();
+            payment.setCode(UUID.randomUUID().toString());
             payment.setUserId(12345L);
             payment.setPaymentItems(List.of(paymentItem, paymentItem2));
             payment.setTotalPrice(new BigDecimal(1800));
+            payment.setActive(true);
             payment.setInsertDate(LocalDateTime.now());
             payment.setUpdateDate(LocalDateTime.now());
             paymentRepository.save(payment);
@@ -59,9 +62,11 @@ public class DataLoader implements CommandLineRunner {
             paymentItem4.setUpdateDate(LocalDateTime.now());
 
             Payment payment2 = new Payment();
+            payment2.setCode(UUID.randomUUID().toString());
             payment2.setUserId(67890L);
             payment2.setPaymentItems(List.of(paymentItem3, paymentItem4));
             payment2.setTotalPrice(new BigDecimal(3600));
+            payment2.setActive(true);
             payment2.setInsertDate(LocalDateTime.now());
             payment2.setUpdateDate(LocalDateTime.now());
             paymentRepository.save(payment2);

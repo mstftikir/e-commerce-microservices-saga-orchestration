@@ -12,8 +12,10 @@ import lombok.Setter;
 public class PaymentDto {
 
     private Long userId;
+    private String code;
     private List<PaymentItemDto> paymentItems;
     private BigDecimal totalPrice;
+    private boolean active;
     private LocalDateTime insertDate;
     private LocalDateTime updateDate;
 }

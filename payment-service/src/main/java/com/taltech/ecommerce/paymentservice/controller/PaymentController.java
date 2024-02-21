@@ -23,22 +23,24 @@ import lombok.extern.slf4j.Slf4j;
 public class PaymentController {
 
     private static final String PAYMENT_RECEIVED_MESSAGE = "{} - Received payment with userId '{}' and code '{}'";
-    private final PaymentService paymentService;
-    private final PaymentMapper paymentMapper;
+
+    private final PaymentService service;
+    private final PaymentMapper mapper;
 
     @PostMapping("/prepare")
     @ResponseStatus(HttpStatus.OK)
     public PaymentDto prepareSave(@RequestBody PaymentDto paymentDto) {
         log.info(PAYMENT_RECEIVED_MESSAGE, "Prepare", paymentDto.getUserId(), paymentDto.getCode());
-        Payment paymentModel = paymentMapper.toModel(paymentDto);
+
+        Payment paymentModel = mapper.toModel(paymentDto);
         Payment savedPayment = new Payment();
         try {
-            savedPayment = paymentService.prepareSave(paymentModel);
+            savedPayment = service.prepareSave(paymentModel);
         }
         catch (UnexpectedRollbackException rollbackException) {
-            log.info("Prepare rollback for payment code '{}'", paymentDto.getCode());
+            log.info("Prepare - Rollback for payment code '{}'", paymentDto.getCode());
         }
-        return paymentMapper.toDto(savedPayment);
+        return mapper.toDto(savedPayment);
     }
 
     @PostMapping("/commit")
@@ -46,9 +48,9 @@ public class PaymentController {
     public PaymentDto commitSave(@RequestBody PaymentDto paymentDto) {
         log.info(PAYMENT_RECEIVED_MESSAGE, "Commit", paymentDto.getUserId(), paymentDto.getCode());
 
-        Payment paymentModel = paymentMapper.toModel(paymentDto);
-        Payment savedPayment = paymentService.commitSave(paymentModel);
-        return paymentMapper.toDto(savedPayment);
+        Payment paymentModel = mapper.toModel(paymentDto);
+        Payment savedPayment = service.commitSave(paymentModel);
+        return mapper.toDto(savedPayment);
     }
 
     @PostMapping("/rollback")
@@ -56,9 +58,9 @@ public class PaymentController {
     public PaymentDto rollbackSave(@RequestBody PaymentDto paymentDto) {
         log.info(PAYMENT_RECEIVED_MESSAGE, "Rollback", paymentDto.getUserId(), paymentDto.getCode());
 
-        Payment paymentModel = paymentMapper.toModel(paymentDto);
-        Payment savedPayment = paymentService.rollbackSave(paymentModel);
-        return paymentMapper.toDto(savedPayment);
+        Payment paymentModel = mapper.toModel(paymentDto);
+        Payment savedPayment = service.rollbackSave(paymentModel);
+        return mapper.toDto(savedPayment);
     }
 }
 

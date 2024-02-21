@@ -45,7 +45,6 @@ public class PaymentService {
             payment.getCode());
 
         boolean rollback = action.equals("Rollback");
-
         if(rollback) {
             String paymentCode = payment.getCode();
             payment = repository.findByCode(payment.getCode()).orElseThrow(() ->
@@ -58,7 +57,7 @@ public class PaymentService {
         }
 
         setPaymentActive(payment, !rollback);
-        if(action.equals("commit")) {
+        if(action.equals("Commit")) {
             setPaymentInsertDates(payment);
         }
         setPaymentUpdateDates(payment);

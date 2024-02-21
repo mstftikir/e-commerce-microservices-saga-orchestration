@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ChartController {
 
-    private static final String RECEIVED_INFO_LOG = "{} - Received request by userId: {}";
+    private static final String RECEIVED_INFO_LOG = "{} - Received request by userId: '{}'";
 
     private final ChartService service;
 

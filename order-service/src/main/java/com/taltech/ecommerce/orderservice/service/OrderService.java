@@ -108,7 +108,7 @@ public class OrderService {
                 .bodyToMono(UserDto.class)
                 .block();
             if(userResponseDto == null) {
-                throw new EntityNotFoundException(String.format("User is not found '%s'", order.getUserId()));
+                throw new EntityNotFoundException(String.format("User '%s' is not found", order.getUserId()));
             }
         });
     }
@@ -125,8 +125,9 @@ public class OrderService {
         );
         InventoryDto[] inventoryArray = inventoryDtos.toArray(new InventoryDto[0]);
         inventoryServiceObservation.observe(() -> {
+            String uri = inventoryServiceUrl + action;
             InventoryDto[] inventoryResponseDtos = webClientBuilder.build().put()
-                .uri(inventoryServiceUrl + action)
+                .uri(uri)
                 .body(Mono.just(inventoryArray), InventoryDto[].class)
                 .retrieve()
                 .bodyToMono(InventoryDto[].class)
@@ -141,8 +142,9 @@ public class OrderService {
         Observation chartServiceObservation = Observation.createNotStarted(action + "-chart-service-delete", this.observationRegistry);
         chartServiceObservation.lowCardinalityKeyValue("chart", "user-service");
         chartServiceObservation.observe(() -> {
+            String uri = chartServiceUrl + action + "/" + order.getUserId();
             webClientBuilder.build().delete()
-                .uri(chartServiceUrl + action + "/" + order.getUserId())
+                .uri(uri)
                 .retrieve()
                 .toBodilessEntity()
                 .block();
@@ -167,15 +169,16 @@ public class OrderService {
             .build();
         AtomicReference<PaymentDto> paymentResponseDto = new AtomicReference<>();
         paymentServiceObservation.observe(() -> {
+            String uri = paymentServiceUrl + action;
             paymentResponseDto.set(webClientBuilder.build()
                 .post()
-                .uri(paymentServiceUrl + action)
+                .uri(uri)
                 .body(Mono.just(paymentDto), PaymentDto.class)
                 .retrieve()
                 .bodyToMono(PaymentDto.class)
                 .block());
             if(paymentResponseDto.get() == null) {
-                throw new EntityNotFoundException(String.format("Payment is not saved '%s'", paymentResponseDto));
+                throw new EntityNotFoundException(String.format("Payment with code '%s' is not saved", paymentDto.getCode()));
             }
         });
         return paymentResponseDto.get();

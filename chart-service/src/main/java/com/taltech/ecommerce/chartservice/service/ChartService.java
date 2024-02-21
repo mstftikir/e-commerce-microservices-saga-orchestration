@@ -43,7 +43,7 @@ public class ChartService {
 
         boolean rollback = action.equals("Rollback");
         if(!rollback && !chart.isActive()) {
-            throw new ChartDeleteException(String.format("%s - chart for userId '%s' is not active",
+            throw new ChartDeleteException(String.format("%s - Chart for userId '%s' is not active",
                 action,
                 userId));
         }

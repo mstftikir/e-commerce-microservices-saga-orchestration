@@ -55,7 +55,7 @@ public class InventoryService {
             else {
                 calculatedQuantity = foundQuantity - receivedQuantity;
                 if (calculatedQuantity < 0) {
-                    throw new InventoryLimitException(String.format("%s - Received inventory quantity '%d' is more than found inventory quantity '%d'",
+                    throw new InventoryLimitException(String.format("%s - Received inventory quantity '%s' is more than found inventory quantity '%s'",
                         action,
                         receivedQuantity,
                         foundQuantity));

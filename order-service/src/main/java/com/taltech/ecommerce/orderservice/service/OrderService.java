@@ -7,6 +7,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -15,6 +16,7 @@ import com.taltech.ecommerce.orderservice.dto.inventory.InventoryDto;
 import com.taltech.ecommerce.orderservice.dto.payment.PaymentDto;
 import com.taltech.ecommerce.orderservice.dto.payment.PaymentItemDto;
 import com.taltech.ecommerce.orderservice.dto.user.UserDto;
+import com.taltech.ecommerce.orderservice.event.TestEvent;
 import com.taltech.ecommerce.orderservice.exception.OrderNotPlacedException;
 import com.taltech.ecommerce.orderservice.model.Order;
 import com.taltech.ecommerce.orderservice.repository.OrderRepository;
@@ -41,6 +43,7 @@ public class OrderService {
     private final OrderRepository repository;
     private final WebClient.Builder webClientBuilder;
     private final ObservationRegistry observationRegistry;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Value("${user.service.url}")
     private String userServiceUrl;
@@ -55,6 +58,7 @@ public class OrderService {
     private String paymentServiceUrl;
 
     public Order placeOrder(Order order) {
+        applicationEventPublisher.publishEvent(new TestEvent("test"));
         validations(order);
 
         //Prepare phase

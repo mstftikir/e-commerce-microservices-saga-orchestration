@@ -90,6 +90,7 @@ services:
   postgres-sonar:
     container_name: postgres-sonar
     image: postgres
+    profiles: ["sonar"]
     environment:
       POSTGRES_DB: postgres-sonar
       POSTGRES_USER: taltech

@@ -3,11 +3,9 @@ package com.taltech.ecommerce.userservice.dto;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
+@Data
 public class UserDto {
 
     private String name;

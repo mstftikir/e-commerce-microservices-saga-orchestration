@@ -3,6 +3,7 @@ package com.taltech.ecommerce.orderservice.service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -14,6 +15,7 @@ import com.taltech.ecommerce.orderservice.dto.inventory.InventoryDto;
 import com.taltech.ecommerce.orderservice.dto.payment.PaymentDto;
 import com.taltech.ecommerce.orderservice.dto.payment.PaymentItemDto;
 import com.taltech.ecommerce.orderservice.dto.user.UserDto;
+import com.taltech.ecommerce.orderservice.exception.OrderNotPlacedException;
 import com.taltech.ecommerce.orderservice.model.Order;
 import com.taltech.ecommerce.orderservice.repository.OrderRepository;
 
@@ -29,6 +31,12 @@ import reactor.core.publisher.Mono;
 @Transactional
 @Slf4j
 public class OrderService {
+
+    private static final String PREPARE = "prepare";
+    private static final String COMMIT = "commit";
+    private static final String ROLLBACK = "rollback";
+    private static final String SERVICES_FAILED_MESSAGE = "{} - {} failed with message: {}";
+    private static final String STARTING_ROLLBACK_MESSAGE = "Starting rollback for {}";
 
     private final OrderRepository repository;
     private final WebClient.Builder webClientBuilder;
@@ -49,11 +57,37 @@ public class OrderService {
     public Order placeOrder(Order order) {
         validations(order);
 
-        updateInventory(order);
-        deleteChart(order);
-        PaymentDto payment = savePayment(order);
+        //Prepare phase
+        updateInventory(PREPARE, order);
+        deleteChart(PREPARE, order);
+        savePayment(PREPARE, order);
 
-        order.setTotalPrice(payment.getTotalPrice());
+        ///Commit Phase
+        updateInventory(COMMIT, order);
+
+        try {
+            deleteChart(COMMIT, order);
+        }
+        catch (Exception exception) {
+            log.error(SERVICES_FAILED_MESSAGE, COMMIT, "deleteChart", exception.getMessage());
+            log.error(STARTING_ROLLBACK_MESSAGE, "updateInventory");
+            updateInventory(ROLLBACK, order);
+            throw new OrderNotPlacedException("deleteChart has been failed, updateInventory has been rollbacked");
+        }
+
+        PaymentDto commitPayment;
+        try {
+            commitPayment = savePayment(COMMIT, order);
+        }
+        catch (Exception exception) {
+            log.error(SERVICES_FAILED_MESSAGE, COMMIT, "commitPayment", exception.getMessage());
+            log.error(STARTING_ROLLBACK_MESSAGE, "deleteChart and updateInventory");
+            deleteChart(ROLLBACK, order);
+            updateInventory(ROLLBACK, order);
+            throw new OrderNotPlacedException("commitPayment has been failed, deleteChart and updateInventory has been rollbacked");
+        }
+
+        order.setTotalPrice(commitPayment.getTotalPrice());
         addDates(order);
 
         return repository.save(order);
@@ -79,8 +113,8 @@ public class OrderService {
         });
     }
 
-    private void updateInventory(Order order) {
-        Observation inventoryServiceObservation = Observation.createNotStarted("inventory-service-update", this.observationRegistry);
+    private void updateInventory(String action, Order order) {
+        Observation inventoryServiceObservation = Observation.createNotStarted(action + "-inventory-service-update", this.observationRegistry);
         inventoryServiceObservation.lowCardinalityKeyValue("call", "inventory-service");
 
         List<InventoryDto> inventoryDtos = new ArrayList<>();
@@ -92,32 +126,32 @@ public class OrderService {
         InventoryDto[] inventoryArray = inventoryDtos.toArray(new InventoryDto[0]);
         inventoryServiceObservation.observe(() -> {
             InventoryDto[] inventoryResponseDtos = webClientBuilder.build().put()
-                .uri(inventoryServiceUrl)
+                .uri(inventoryServiceUrl + action)
                 .body(Mono.just(inventoryArray), InventoryDto[].class)
                 .retrieve()
                 .bodyToMono(InventoryDto[].class)
                 .block();
             if(inventoryResponseDtos == null || inventoryResponseDtos.length == 0) {
-                throw new EntityNotFoundException(String.format("Inventory is not updated '%s'", inventoryDtos));
+                throw new EntityNotFoundException(String.format("%s - Inventory is not updated '%s'", action, inventoryDtos));
             }
         });
     }
 
-    private void deleteChart(Order order) {
-        Observation chartServiceObservation = Observation.createNotStarted("chart-service-delete", this.observationRegistry);
+    private void deleteChart(String action, Order order) {
+        Observation chartServiceObservation = Observation.createNotStarted(action + "-chart-service-delete", this.observationRegistry);
         chartServiceObservation.lowCardinalityKeyValue("chart", "user-service");
-        chartServiceObservation.observe(() ->
+        chartServiceObservation.observe(() -> {
             webClientBuilder.build().delete()
-                .uri(chartServiceUrl + order.getUserId())
+                .uri(chartServiceUrl + action + "/" + order.getUserId())
                 .retrieve()
                 .toBodilessEntity()
-                .block()
-        );
+                .block();
+                return true;
+            });
     }
 
-    private PaymentDto savePayment(Order order) {
-        AtomicReference<PaymentDto> paymentResponseDto = new AtomicReference<>();
-        Observation paymentServiceObservation = Observation.createNotStarted("payment-service-save", this.observationRegistry);
+    private PaymentDto savePayment(String action, Order order) {
+        Observation paymentServiceObservation = Observation.createNotStarted(action + "-payment-service-save", this.observationRegistry);
         paymentServiceObservation.lowCardinalityKeyValue("call", "payment-service");
 
         List<PaymentItemDto> paymentItemDtos = new ArrayList<>();
@@ -127,13 +161,15 @@ public class OrderService {
             .price(orderItem.getPrice())
             .build()));
         PaymentDto paymentDto = PaymentDto.builder()
+            .code(UUID.randomUUID().toString())
             .userId(order.getUserId())
             .paymentItems(paymentItemDtos)
             .build();
+        AtomicReference<PaymentDto> paymentResponseDto = new AtomicReference<>();
         paymentServiceObservation.observe(() -> {
             paymentResponseDto.set(webClientBuilder.build()
                 .post()
-                .uri(paymentServiceUrl)
+                .uri(paymentServiceUrl + action)
                 .body(Mono.just(paymentDto), PaymentDto.class)
                 .retrieve()
                 .bodyToMono(PaymentDto.class)

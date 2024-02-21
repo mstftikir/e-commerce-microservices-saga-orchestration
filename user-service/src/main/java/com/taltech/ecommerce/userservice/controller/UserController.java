@@ -28,6 +28,7 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     public UserDto findById(@PathVariable("id") Long id) {
         log.info("Received user find by id '{}' request", id);
+
         User foundUser = service.findById(id);
         return mapper.toDto(foundUser);
     }

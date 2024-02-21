@@ -3,7 +3,6 @@ package com.taltech.ecommerce.inventoryservice.controller;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,15 +23,15 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class InventoryController {
 
-    private static final String RECEIVED_INVENTORY_UPDATE = "{} - Received inventory update for: {}";
+    private static final String RECEIVED_INVENTORY_UPDATE = "{} - Received inventory update for '{}' inventory items";
 
     private final InventoryService service;
     private final InventoryMapper mapper;
 
-    @GetMapping("/prepare")
+    @PutMapping("/prepare")
     @ResponseStatus(HttpStatus.OK)
     public List<InventoryDto> prepareUpdate(@RequestBody List<InventoryDto> inventoryDtos) {
-        log.info(RECEIVED_INVENTORY_UPDATE, "Prepare", inventoryDtos);
+        log.info(RECEIVED_INVENTORY_UPDATE, "Prepare", inventoryDtos.size());
 
         List<Inventory> modelList = mapper.toModelList(inventoryDtos);
         List<Inventory> updatedList = service.prepareUpdate(modelList);
@@ -42,7 +41,7 @@ public class InventoryController {
     @PutMapping("/commit")
     @ResponseStatus(HttpStatus.OK)
     public List<InventoryDto> commitUpdate(@RequestBody List<InventoryDto> inventoryDtos) {
-        log.info(RECEIVED_INVENTORY_UPDATE, "Commit", inventoryDtos);
+        log.info(RECEIVED_INVENTORY_UPDATE, "Commit", inventoryDtos.size());
 
         List<Inventory> modelList = mapper.toModelList(inventoryDtos);
         List<Inventory> updatedList = service.commitUpdate(modelList);
@@ -52,7 +51,7 @@ public class InventoryController {
     @PutMapping("/rollback")
     @ResponseStatus(HttpStatus.OK)
     public List<InventoryDto> rollbackUpdate(@RequestBody List<InventoryDto> inventoryDtos) {
-        log.info(RECEIVED_INVENTORY_UPDATE, "Rollback", inventoryDtos);
+        log.info(RECEIVED_INVENTORY_UPDATE, "Rollback", inventoryDtos.size());
 
         List<Inventory> modelList = mapper.toModelList(inventoryDtos);
         List<Inventory> updatedList = service.rollbackUpdate(modelList);

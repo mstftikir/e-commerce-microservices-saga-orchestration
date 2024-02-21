@@ -56,7 +56,11 @@ public class PaymentService {
         else{
             calculateTotalPrice(payment);
         }
+
         setPaymentActive(payment, !rollback);
+        if(action.equals("commit")) {
+            setPaymentInsertDates(payment);
+        }
         setPaymentUpdateDates(payment);
 
         try {
@@ -85,6 +89,11 @@ public class PaymentService {
         AtomicReference<BigDecimal> totalPrice = new AtomicReference<>(BigDecimal.ZERO);
         payment.getPaymentItems().forEach(paymentItem -> totalPrice.updateAndGet(t -> t.add(paymentItem.getPrice().multiply(new BigDecimal(paymentItem.getQuantity())))));
         payment.setTotalPrice(totalPrice.get());
+    }
+
+    private void setPaymentInsertDates(Payment payment) {
+        payment.setInsertDate(LocalDateTime.now());
+        payment.getPaymentItems().forEach(paymentItem -> paymentItem.setInsertDate(LocalDateTime.now()));
     }
 
     private void setPaymentUpdateDates(Payment payment) {

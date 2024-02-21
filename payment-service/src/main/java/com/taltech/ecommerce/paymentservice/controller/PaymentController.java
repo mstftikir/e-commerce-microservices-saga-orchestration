@@ -2,9 +2,7 @@ package com.taltech.ecommerce.paymentservice.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.UnexpectedRollbackException;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -28,7 +26,7 @@ public class PaymentController {
     private final PaymentService paymentService;
     private final PaymentMapper paymentMapper;
 
-    @GetMapping("/prepare")
+    @PostMapping("/prepare")
     @ResponseStatus(HttpStatus.OK)
     public PaymentDto prepareSave(@RequestBody PaymentDto paymentDto) {
         log.info(PAYMENT_RECEIVED_MESSAGE, "Prepare", paymentDto.getUserId(), paymentDto.getCode());
@@ -53,7 +51,7 @@ public class PaymentController {
         return paymentMapper.toDto(savedPayment);
     }
 
-    @PutMapping("/rollback")
+    @PostMapping("/rollback")
     @ResponseStatus(HttpStatus.OK)
     public PaymentDto rollbackSave(@RequestBody PaymentDto paymentDto) {
         log.info(PAYMENT_RECEIVED_MESSAGE, "Rollback", paymentDto.getUserId(), paymentDto.getCode());

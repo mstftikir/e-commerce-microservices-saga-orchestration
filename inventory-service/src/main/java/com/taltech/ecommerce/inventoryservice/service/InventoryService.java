@@ -70,7 +70,7 @@ public class InventoryService {
     }
 
     private List<Inventory> findByCode(String action, List<Inventory> receivedInventoryList) {
-        log.info("{} - Checking inventory for {}", action, receivedInventoryList);
+        log.info("{} - Checking inventory for '{}' inventory items", action, receivedInventoryList.size());
         List<String> codes = receivedInventoryList.stream().map(Inventory::getCode).toList();
         List<Inventory> foundInventoryList = repository.findByCodeIn(codes);
         if(foundInventoryList.size() != receivedInventoryList.size()) {

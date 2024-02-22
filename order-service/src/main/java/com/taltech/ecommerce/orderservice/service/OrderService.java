@@ -18,11 +18,10 @@ import com.taltech.ecommerce.orderservice.dto.user.UserDto;
 import com.taltech.ecommerce.orderservice.event.ChartEvent;
 import com.taltech.ecommerce.orderservice.event.InventoryEvent;
 import com.taltech.ecommerce.orderservice.event.PaymentEvent;
-import com.taltech.ecommerce.orderservice.exception.OrderNotPlacedException;
-import com.taltech.ecommerce.orderservice.listener.ChartEventPublisher;
-import com.taltech.ecommerce.orderservice.listener.InventoryEventPublisher;
-import com.taltech.ecommerce.orderservice.listener.PaymentEventPublisher;
 import com.taltech.ecommerce.orderservice.model.Order;
+import com.taltech.ecommerce.orderservice.publisher.ChartEventPublisher;
+import com.taltech.ecommerce.orderservice.publisher.InventoryEventPublisher;
+import com.taltech.ecommerce.orderservice.publisher.PaymentEventPublisher;
 import com.taltech.ecommerce.orderservice.repository.OrderRepository;
 
 import io.micrometer.observation.Observation;
@@ -64,9 +63,9 @@ public class OrderService {
     private String paymentServiceUrl;
 
     public void testMainTopics() {
-        inventoryEventPublisher.publishEvent("updateInventoryTopic", new InventoryEvent(InventoryDto.builder()
+        inventoryEventPublisher.publishEvent("updateInventoryTopic", new InventoryEvent(List.of(InventoryDto.builder()
             .code("inv-code-1")
-            .build()));
+            .build())));
         chartEventPublisher.publishEvent("deleteChartTopic", new ChartEvent(12345L));
         paymentEventPublisher.publishEvent("savePaymentTopic", new PaymentEvent(PaymentDto.builder()
             .code("pay-code-1")
@@ -74,9 +73,9 @@ public class OrderService {
     }
 
     public void testRollbackTopics() {
-        inventoryEventPublisher.publishEvent("rollbackInventoryTopic", new InventoryEvent(InventoryDto.builder()
+        inventoryEventPublisher.publishEvent("rollbackInventoryTopic", new InventoryEvent(List.of(InventoryDto.builder()
             .code("inv-code-1")
-            .build()));
+            .build())));
         chartEventPublisher.publishEvent("rollbackChartTopic", new ChartEvent(12345L));
         paymentEventPublisher.publishEvent("rollbackPaymentTopic", new PaymentEvent(PaymentDto.builder()
             .code("pay-code-1")
@@ -84,42 +83,55 @@ public class OrderService {
     }
 
     public Order placeOrder(Order order) {
-        validations(order);
+//        validations(order);
+
+        publishUpdateInventory(order);
 
         //Prepare phase
-        updateInventory(PREPARE, order);
-        deleteChart(PREPARE, order);
-        savePayment(PREPARE, order);
+//        updateInventory(PREPARE, order);
+//        deleteChart(PREPARE, order);
+//        savePayment(PREPARE, order);
 
         ///Commit Phase
-        updateInventory(COMMIT, order);
-
-        try {
-            deleteChart(COMMIT, order);
-        }
-        catch (Exception exception) {
-            log.error(SERVICES_FAILED_MESSAGE, COMMIT, "deleteChart", exception.getMessage());
-            log.error(STARTING_ROLLBACK_MESSAGE, "updateInventory");
-            updateInventory(ROLLBACK, order);
-            throw new OrderNotPlacedException("deleteChart has been failed, updateInventory has been rollbacked");
-        }
-
-        PaymentDto commitPayment;
-        try {
-            commitPayment = savePayment(COMMIT, order);
-        }
-        catch (Exception exception) {
-            log.error(SERVICES_FAILED_MESSAGE, COMMIT, "commitPayment", exception.getMessage());
-            log.error(STARTING_ROLLBACK_MESSAGE, "deleteChart and updateInventory");
-            deleteChart(ROLLBACK, order);
-            updateInventory(ROLLBACK, order);
-            throw new OrderNotPlacedException("commitPayment has been failed, deleteChart and updateInventory has been rollbacked");
-        }
-
-        order.setTotalPrice(commitPayment.getTotalPrice());
-        addDates(order);
+//        updateInventory(COMMIT, order);
+//
+//        try {
+//            deleteChart(COMMIT, order);
+//        }
+//        catch (Exception exception) {
+//            log.error(SERVICES_FAILED_MESSAGE, COMMIT, "deleteChart", exception.getMessage());
+//            log.error(STARTING_ROLLBACK_MESSAGE, "updateInventory");
+//            updateInventory(ROLLBACK, order);
+//            throw new OrderNotPlacedException("deleteChart has been failed, updateInventory has been rollbacked");
+//        }
+//
+//        PaymentDto commitPayment;
+//        try {
+//            commitPayment = savePayment(COMMIT, order);
+//        }
+//        catch (Exception exception) {
+//            log.error(SERVICES_FAILED_MESSAGE, COMMIT, "commitPayment", exception.getMessage());
+//            log.error(STARTING_ROLLBACK_MESSAGE, "deleteChart and updateInventory");
+//            deleteChart(ROLLBACK, order);
+//            updateInventory(ROLLBACK, order);
+//            throw new OrderNotPlacedException("commitPayment has been failed, deleteChart and updateInventory has been rollbacked");
+//        }
+//
+//        order.setTotalPrice(commitPayment.getTotalPrice());
+//        addDates(order);
 
         return repository.save(order);
+    }
+
+    private void publishUpdateInventory(Order order) {
+        List<InventoryDto> inventoryDtoList = new ArrayList<>();
+        order.getOrderItems().forEach(orderItem -> inventoryDtoList.add(InventoryDto.builder()
+            .code(orderItem.getInventoryCode())
+            .quantity(orderItem.getQuantity())
+            .build())
+        );
+
+        inventoryEventPublisher.publishEvent("updateInventoryTopic", new InventoryEvent(inventoryDtoList));
     }
 
     private void validations(Order order) {
@@ -221,5 +233,21 @@ public class OrderService {
             paymentItem.setInsertDate(LocalDateTime.now());
             paymentItem.setUpdateDate(LocalDateTime.now());
         });
+    }
+
+    public void invoiceUpdated(InventoryEvent inventoryEvent) {
+        //TODO: Implement logic
+    }
+
+    public void invoiceUpdateFailed(InventoryEvent inventoryEvent) {
+        //TODO: Implement logic
+    }
+
+    public void invoiceRollbacked(InventoryEvent inventoryEvent) {
+        //TODO: Implement logic
+    }
+
+    public void invoiceRollbackFailed(InventoryEvent inventoryEvent) {
+        //TODO: Implement logic
     }
 }

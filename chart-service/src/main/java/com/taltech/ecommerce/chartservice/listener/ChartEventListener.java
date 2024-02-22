@@ -13,19 +13,19 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class ChartListener {
+public class ChartEventListener {
 
     private final ObservationRegistry observationRegistry;
 
     @KafkaListener(topics = "deleteChartTopic")
     public void receiveDeleteChartEvent(ChartEvent chartEvent) {
-        Observation.createNotStarted("on-delete-chart-message-received", this.observationRegistry)
+        Observation.createNotStarted("on-delete-chart-event-received", this.observationRegistry)
             .observe(() -> log.info("Delete chart with userId '{}'", chartEvent.getUserId()));
     }
 
     @KafkaListener(topics = "rollbackChartTopic")
     public void receiveRollbackChartEvent(ChartEvent chartEvent) {
-        Observation.createNotStarted("on-rollback-chart-message-received", this.observationRegistry)
+        Observation.createNotStarted("on-rollback-chart-event-received", this.observationRegistry)
             .observe(() -> log.info("Rollback chart with userId '{}'", chartEvent.getUserId()));
     }
 }

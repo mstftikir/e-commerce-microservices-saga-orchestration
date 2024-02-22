@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.taltech.ecommerce.inventoryservice.exception.InventoryLimitException;
 import com.taltech.ecommerce.inventoryservice.model.Inventory;
+import com.taltech.ecommerce.inventoryservice.publisher.InventoryEventPublisher;
 import com.taltech.ecommerce.inventoryservice.repository.InventoryRepository;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -20,20 +21,30 @@ import lombok.extern.slf4j.Slf4j;
 public class InventoryService {
 
     private final InventoryRepository repository;
+    private final InventoryEventPublisher eventPublisher;
 
-    @Transactional(readOnly = true)
-    public List<Inventory> prepareUpdate(List<Inventory> inventoryList) {
-        return updateInventories("Prepare", inventoryList);
+    @Transactional
+    public void commitUpdate(List<Inventory> inventoryList) {
+        try {
+            List<Inventory> updatedInventoryList = updateInventories("Commit", inventoryList);
+            eventPublisher.publishEvent("inventoryUpdatedTopic", updatedInventoryList);
+        }
+        catch (Exception exception) {
+            log.error("Updating inventory failed with exception message: {}", exception.getMessage());
+            eventPublisher.publishEvent("inventoryUpdateFailedTopic", inventoryList);
+        }
     }
 
     @Transactional
-    public List<Inventory> commitUpdate(List<Inventory> inventoryList) {
-        return updateInventories("Commit", inventoryList);
-    }
-
-    @Transactional
-    public List<Inventory> rollbackUpdate(List<Inventory> inventoryList) {
-        return updateInventories("Rollback", inventoryList);
+    public void rollbackUpdate(List<Inventory> inventoryList) {
+        try {
+            List<Inventory> updatedInventoryList = updateInventories("Rollback", inventoryList);
+            eventPublisher.publishEvent("inventoryRollbackedTopic", updatedInventoryList);
+        }
+        catch (Exception exception) {
+            log.error("Rollbacking inventory failed with exception message: {}", exception.getMessage());
+            eventPublisher.publishEvent("inventoryRollbackFailedTopic", inventoryList);
+        }
     }
 
     private List<Inventory> updateInventories(String action, List<Inventory> inventoryList) {

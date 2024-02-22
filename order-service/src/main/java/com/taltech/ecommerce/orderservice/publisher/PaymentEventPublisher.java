@@ -1,4 +1,4 @@
-package com.taltech.ecommerce.orderservice.listener;
+package com.taltech.ecommerce.orderservice.publisher;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -23,10 +23,10 @@ public class PaymentEventPublisher {
     private final ObservationRegistry observationRegistry;
 
     public void publishEvent(String topic, PaymentEvent event) {
-        log.info("Publishing ChartEvent to chartTopic with code {}", event.getPaymentDto().getCode());
+        log.info("Publishing payment event to '{}'", topic);
 
         try {
-            Observation.createNotStarted("payment-topic", this.observationRegistry).observe(() -> {
+            Observation.createNotStarted(topic, this.observationRegistry).observe(() -> {
                 CompletableFuture<SendResult<String, PaymentEvent>> future = kafkaTemplate.send(topic, event);
                 return future.handle((result, throwable) -> CompletableFuture.completedFuture(result));
             });

@@ -7,7 +7,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Component;
 
-import com.taltech.ecommerce.orderservice.event.TestEvent;
+import com.taltech.ecommerce.orderservice.event.InventoryEvent;
 
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
@@ -17,20 +17,19 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class TestListener {
+public class InventoryListener {
 
 
-    private final KafkaTemplate<String, TestEvent> kafkaTemplate;
+    private final KafkaTemplate<String, InventoryEvent> kafkaTemplate;
     private final ObservationRegistry observationRegistry;
 
     @EventListener
-    public void publishEvent(TestEvent event) {
-        log.info("Test Event Received, Sending TestEvent to testTopic: {}", event.getData());
+    public void publishEvent(InventoryEvent event) {
+        log.info("Inventory Event Received, Sending InventoryEvent to inventoryTopic: {}", event.getData());
 
         try {
-            Observation.createNotStarted("test-topic", this.observationRegistry).observe(() -> {
-                CompletableFuture<SendResult<String, TestEvent>> future = kafkaTemplate.send("testTopic",
-                    new TestEvent(event.getData()));
+            Observation.createNotStarted("inventory-topic", this.observationRegistry).observe(() -> {
+                CompletableFuture<SendResult<String, InventoryEvent>> future = kafkaTemplate.send("inventoryTopic", event);
                 return future.handle((result, throwable) -> CompletableFuture.completedFuture(result));
             });
         } catch (Exception exception) {

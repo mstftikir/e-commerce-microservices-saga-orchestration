@@ -11,8 +11,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Component
-@Slf4j
 @RequiredArgsConstructor
+@Slf4j
 public class InventoryListener {
 
     private final ObservationRegistry observationRegistry;
@@ -20,6 +20,6 @@ public class InventoryListener {
     @KafkaListener(topics = "inventoryTopic")
     public void receiveEvent(InventoryEvent inventoryEvent) {
         Observation.createNotStarted("on-inventory-message-received", this.observationRegistry)
-            .observe(() -> log.info("Got message with code '{}'", inventoryEvent.getInventoryDto().getCode()));
+            .observe(() -> log.info("Got message with inventory code '{}'", inventoryEvent.getInventoryDto().getCode()));
     }
 }

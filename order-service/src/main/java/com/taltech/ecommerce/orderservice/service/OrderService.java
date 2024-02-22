@@ -16,7 +16,9 @@ import com.taltech.ecommerce.orderservice.dto.inventory.InventoryDto;
 import com.taltech.ecommerce.orderservice.dto.payment.PaymentDto;
 import com.taltech.ecommerce.orderservice.dto.payment.PaymentItemDto;
 import com.taltech.ecommerce.orderservice.dto.user.UserDto;
+import com.taltech.ecommerce.orderservice.event.ChartEvent;
 import com.taltech.ecommerce.orderservice.event.InventoryEvent;
+import com.taltech.ecommerce.orderservice.event.PaymentEvent;
 import com.taltech.ecommerce.orderservice.exception.OrderNotPlacedException;
 import com.taltech.ecommerce.orderservice.model.Order;
 import com.taltech.ecommerce.orderservice.repository.OrderRepository;
@@ -58,10 +60,14 @@ public class OrderService {
     private String paymentServiceUrl;
 
     public Order placeOrder(Order order) {
-
         applicationEventPublisher.publishEvent(new InventoryEvent(InventoryDto.builder()
             .code("inv-code-1")
             .build()));
+        applicationEventPublisher.publishEvent(new ChartEvent(12345L));
+        applicationEventPublisher.publishEvent(new PaymentEvent(PaymentDto.builder()
+            .code("pay-code-1")
+            .build()));
+
         validations(order);
 
         //Prepare phase

@@ -17,9 +17,15 @@ public class PaymentListener {
 
     private final ObservationRegistry observationRegistry;
 
-    @KafkaListener(topics = "paymentTopic")
-    public void receiveEvent(PaymentEvent paymentEvent) {
-        Observation.createNotStarted("on-chart-message-received", this.observationRegistry)
-            .observe(() -> log.info("Got message with payment code '{}'", paymentEvent.getPaymentDto().getCode()));
+    @KafkaListener(topics = "savePaymentTopic")
+    public void receiveSavePaymentEvent(PaymentEvent paymentEvent) {
+        Observation.createNotStarted("on-save-payment-message-received", this.observationRegistry)
+            .observe(() -> log.info("Save payment with payment '{}'", paymentEvent.getPaymentDto().getCode()));
+    }
+
+    @KafkaListener(topics = "rollbackPaymentTopic")
+    public void receiveRollbackPaymentEvent(PaymentEvent paymentEvent) {
+        Observation.createNotStarted("on-rollback-payment-message-received", this.observationRegistry)
+            .observe(() -> log.info("Rollback payment with payment code '{}'", paymentEvent.getPaymentDto().getCode()));
     }
 }

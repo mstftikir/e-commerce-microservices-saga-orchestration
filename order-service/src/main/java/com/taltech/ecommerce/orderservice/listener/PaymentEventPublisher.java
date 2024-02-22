@@ -2,12 +2,11 @@ package com.taltech.ecommerce.orderservice.listener;
 
 import java.util.concurrent.CompletableFuture;
 
-import org.springframework.context.event.EventListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Component;
 
-import com.taltech.ecommerce.orderservice.event.ChartEvent;
+import com.taltech.ecommerce.orderservice.event.PaymentEvent;
 
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
@@ -17,19 +16,18 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class ChartPublisher {
+public class PaymentEventPublisher {
 
 
-    private final KafkaTemplate<String, ChartEvent> kafkaTemplate;
+    private final KafkaTemplate<String, PaymentEvent> kafkaTemplate;
     private final ObservationRegistry observationRegistry;
 
-    @EventListener
-    public void publishEvent(ChartEvent event) {
-        log.info("Publishing ChartEvent to chartTopic with userId {}", event.getUserId());
+    public void publishEvent(String topic, PaymentEvent event) {
+        log.info("Publishing ChartEvent to chartTopic with code {}", event.getPaymentDto().getCode());
 
         try {
-            Observation.createNotStarted("chart-topic", this.observationRegistry).observe(() -> {
-                CompletableFuture<SendResult<String, ChartEvent>> future = kafkaTemplate.send("chartTopic", event);
+            Observation.createNotStarted("payment-topic", this.observationRegistry).observe(() -> {
+                CompletableFuture<SendResult<String, PaymentEvent>> future = kafkaTemplate.send(topic, event);
                 return future.handle((result, throwable) -> CompletableFuture.completedFuture(result));
             });
         } catch (Exception exception) {

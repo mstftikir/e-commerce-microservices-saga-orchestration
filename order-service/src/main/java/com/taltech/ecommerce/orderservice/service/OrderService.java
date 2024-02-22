@@ -7,7 +7,6 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -20,6 +19,9 @@ import com.taltech.ecommerce.orderservice.event.ChartEvent;
 import com.taltech.ecommerce.orderservice.event.InventoryEvent;
 import com.taltech.ecommerce.orderservice.event.PaymentEvent;
 import com.taltech.ecommerce.orderservice.exception.OrderNotPlacedException;
+import com.taltech.ecommerce.orderservice.listener.ChartEventPublisher;
+import com.taltech.ecommerce.orderservice.listener.InventoryEventPublisher;
+import com.taltech.ecommerce.orderservice.listener.PaymentEventPublisher;
 import com.taltech.ecommerce.orderservice.model.Order;
 import com.taltech.ecommerce.orderservice.repository.OrderRepository;
 
@@ -45,7 +47,9 @@ public class OrderService {
     private final OrderRepository repository;
     private final WebClient.Builder webClientBuilder;
     private final ObservationRegistry observationRegistry;
-    private final ApplicationEventPublisher applicationEventPublisher;
+    private final InventoryEventPublisher inventoryEventPublisher;
+    private final ChartEventPublisher chartEventPublisher;
+    private final PaymentEventPublisher paymentEventPublisher;
 
     @Value("${user.service.url}")
     private String userServiceUrl;
@@ -59,15 +63,27 @@ public class OrderService {
     @Value("${payment.service.url}")
     private String paymentServiceUrl;
 
-    public Order placeOrder(Order order) {
-        applicationEventPublisher.publishEvent(new InventoryEvent(InventoryDto.builder()
+    public void testMainTopics() {
+        inventoryEventPublisher.publishEvent("updateInventoryTopic", new InventoryEvent(InventoryDto.builder()
             .code("inv-code-1")
             .build()));
-        applicationEventPublisher.publishEvent(new ChartEvent(12345L));
-        applicationEventPublisher.publishEvent(new PaymentEvent(PaymentDto.builder()
+        chartEventPublisher.publishEvent("deleteChartTopic", new ChartEvent(12345L));
+        paymentEventPublisher.publishEvent("savePaymentTopic", new PaymentEvent(PaymentDto.builder()
             .code("pay-code-1")
             .build()));
+    }
 
+    public void testRollbackTopics() {
+        inventoryEventPublisher.publishEvent("rollbackInventoryTopic", new InventoryEvent(InventoryDto.builder()
+            .code("inv-code-1")
+            .build()));
+        chartEventPublisher.publishEvent("rollbackChartTopic", new ChartEvent(12345L));
+        paymentEventPublisher.publishEvent("rollbackPaymentTopic", new PaymentEvent(PaymentDto.builder()
+            .code("pay-code-1")
+            .build()));
+    }
+
+    public Order placeOrder(Order order) {
         validations(order);
 
         //Prepare phase

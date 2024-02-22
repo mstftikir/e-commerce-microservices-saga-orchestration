@@ -1,6 +1,7 @@
 package com.taltech.ecommerce.orderservice.controller;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,5 +33,17 @@ public class OrderController {
         Order orderModel = mapper.toModel(orderDto);
         Order savedOrder = service.placeOrder(orderModel);
         return mapper.toDto(savedOrder);
+    }
+
+    @GetMapping("/main")
+    @ResponseStatus(HttpStatus.OK)
+    public void testMainTopics() {
+        service.testMainTopics();
+    }
+
+    @GetMapping("/rollback")
+    @ResponseStatus(HttpStatus.OK)
+    public void testRollbackTopics() {
+        service.testRollbackTopics();
     }
 }

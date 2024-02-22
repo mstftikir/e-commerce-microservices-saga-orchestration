@@ -17,9 +17,15 @@ public class InventoryListener {
 
     private final ObservationRegistry observationRegistry;
 
-    @KafkaListener(topics = "inventoryTopic")
-    public void receiveEvent(InventoryEvent inventoryEvent) {
-        Observation.createNotStarted("on-inventory-message-received", this.observationRegistry)
-            .observe(() -> log.info("Got message with inventory code '{}'", inventoryEvent.getInventoryDto().getCode()));
+    @KafkaListener(topics = "updateInventoryTopic")
+    public void receiveUpdateInventoryEvent(InventoryEvent inventoryEvent) {
+        Observation.createNotStarted("on-update-inventory-message-received", this.observationRegistry)
+            .observe(() -> log.info("Update inventory with inventory code '{}'", inventoryEvent.getInventoryDto().getCode()));
+    }
+
+    @KafkaListener(topics = "rollbackInventoryTopic")
+    public void receiveRollbackInventoryEvent(InventoryEvent inventoryEvent) {
+        Observation.createNotStarted("on-rollback-inventory-message-received", this.observationRegistry)
+            .observe(() -> log.info("Rollback inventory with inventory code '{}'", inventoryEvent.getInventoryDto().getCode()));
     }
 }

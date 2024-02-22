@@ -20,6 +20,6 @@ public class InventoryListener {
     @KafkaListener(topics = "inventoryTopic")
     public void receiveEvent(InventoryEvent inventoryEvent) {
         Observation.createNotStarted("on-inventory-message-received", this.observationRegistry)
-            .observe(() -> log.info("Got message '{}'", inventoryEvent.getData()));
+            .observe(() -> log.info("Got message with code '{}'", inventoryEvent.getInventoryDto().getCode()));
     }
 }

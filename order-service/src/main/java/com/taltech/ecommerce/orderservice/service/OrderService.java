@@ -58,7 +58,10 @@ public class OrderService {
     private String paymentServiceUrl;
 
     public Order placeOrder(Order order) {
-        applicationEventPublisher.publishEvent(new InventoryEvent("test"));
+
+        applicationEventPublisher.publishEvent(new InventoryEvent(InventoryDto.builder()
+            .code("inv-code-1")
+            .build()));
         validations(order);
 
         //Prepare phase

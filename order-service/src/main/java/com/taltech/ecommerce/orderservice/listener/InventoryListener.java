@@ -25,7 +25,7 @@ public class InventoryListener {
 
     @EventListener
     public void publishEvent(InventoryEvent event) {
-        log.info("Inventory Event Received, Sending InventoryEvent to inventoryTopic: {}", event.getData());
+        log.info("Inventory Event Received, Sending InventoryEvent to inventoryTopic with code {}", event.getInventoryDto().getCode());
 
         try {
             Observation.createNotStarted("inventory-topic", this.observationRegistry).observe(() -> {

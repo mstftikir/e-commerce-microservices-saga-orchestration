@@ -6,7 +6,10 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.taltech.ecommerce.inventoryservice.dto.InventoryDto;
+import com.taltech.ecommerce.inventoryservice.event.InventoryEvent;
 import com.taltech.ecommerce.inventoryservice.exception.InventoryLimitException;
+import com.taltech.ecommerce.inventoryservice.mapper.InventoryMapper;
 import com.taltech.ecommerce.inventoryservice.model.Inventory;
 import com.taltech.ecommerce.inventoryservice.publisher.InventoryEventPublisher;
 import com.taltech.ecommerce.inventoryservice.repository.InventoryRepository;
@@ -22,27 +25,34 @@ import lombok.extern.slf4j.Slf4j;
 public class InventoryService {
 
     private final InventoryRepository repository;
+    private final InventoryMapper mapper;
     private final InventoryEventPublisher eventPublisher;
 
-    public void commitUpdate(List<Inventory> inventoryList) {
+    public void commitUpdate(InventoryEvent inventoryEvent) {
+        List<Inventory> inventoryList = mapper.toModelList(inventoryEvent.getInventoryList());
         try {
             List<Inventory> updatedInventoryList = updateInventories("Commit", inventoryList);
-            eventPublisher.publishInventoryUpdated(updatedInventoryList);
+            List<InventoryDto> updatedInventoryDtoList = mapper.toDtoList(updatedInventoryList);
+            inventoryEvent.setInventoryList(updatedInventoryDtoList);
+            eventPublisher.publishInventoryUpdated(inventoryEvent);
         }
         catch (Exception exception) {
             log.error("Updating inventory failed with exception message: {}", exception.getMessage());
-            eventPublisher.publishInventoryUpdateFailed(inventoryList);
+            eventPublisher.publishInventoryUpdateFailed(inventoryEvent);
         }
     }
 
-    public void rollbackUpdate(List<Inventory> inventoryList) {
+    public void rollbackUpdate(InventoryEvent inventoryEvent) {
+        List<Inventory> inventoryList = mapper.toModelList(inventoryEvent.getInventoryList());
         try {
             List<Inventory> updatedInventoryList = updateInventories("Rollback", inventoryList);
-            eventPublisher.publishInventoryRollbacked(updatedInventoryList);
+            List<InventoryDto> updatedInventoryDtoList = mapper.toDtoList(updatedInventoryList);
+            inventoryEvent.setInventoryList(updatedInventoryDtoList);
+            eventPublisher.publishInventoryRollbacked(inventoryEvent);
         }
         catch (Exception exception) {
             log.error("Rollbacking inventory failed with exception message: {}", exception.getMessage());
-            eventPublisher.publishInventoryRollbackFailed(inventoryList);
+            eventPublisher.publishInventoryRollbackFailed(inventoryEvent);
         }
     }
 

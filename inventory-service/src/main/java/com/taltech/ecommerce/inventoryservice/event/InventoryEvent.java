@@ -15,5 +15,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class InventoryEvent {
 
+    private String eventId;
     private List<InventoryDto> inventoryList;
 }

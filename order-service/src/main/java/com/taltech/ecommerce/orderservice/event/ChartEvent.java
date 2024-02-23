@@ -11,5 +11,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ChartEvent {
 
+    private String eventId;
     private Long userId;
 }

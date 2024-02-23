@@ -1,16 +1,12 @@
 package com.taltech.ecommerce.inventoryservice.publisher;
 
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Component;
 
-import com.taltech.ecommerce.inventoryservice.dto.InventoryDto;
 import com.taltech.ecommerce.inventoryservice.event.InventoryEvent;
-import com.taltech.ecommerce.inventoryservice.mapper.InventoryMapper;
-import com.taltech.ecommerce.inventoryservice.model.Inventory;
 
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
@@ -23,32 +19,29 @@ import lombok.extern.slf4j.Slf4j;
 public class InventoryEventPublisher {
 
     private final KafkaTemplate<String, InventoryEvent> kafkaTemplate;
-    private final InventoryMapper mapper;
     private final ObservationRegistry observationRegistry;
 
-    public void publishInventoryUpdated(List<Inventory> inventoryList) {
-        publishEvent("inventoryUpdatedTopic", "inventory-updated-sent", inventoryList);
+    public void publishInventoryUpdated(InventoryEvent inventoryEvent) {
+        publishEvent("inventoryUpdatedTopic", "inventory-updated-sent", inventoryEvent);
     }
 
-    public void publishInventoryUpdateFailed(List<Inventory> inventoryList) {
-        publishEvent("inventoryUpdateFailedTopic", "inventory-update-failed-sent", inventoryList);
+    public void publishInventoryUpdateFailed(InventoryEvent inventoryEvent) {
+        publishEvent("inventoryUpdateFailedTopic", "inventory-update-failed-sent", inventoryEvent);
     }
 
-    public void publishInventoryRollbacked(List<Inventory> inventoryList) {
-        publishEvent("inventoryRollbackedTopic", "inventory-rollbacked-sent", inventoryList);
+    public void publishInventoryRollbacked(InventoryEvent inventoryEvent) {
+        publishEvent("inventoryRollbackedTopic", "inventory-rollbacked-sent", inventoryEvent);
     }
 
-    public void publishInventoryRollbackFailed(List<Inventory> inventoryList) {
-        publishEvent("inventoryRollbackFailedTopic", "inventory-rollback-failed-sent", inventoryList);
+    public void publishInventoryRollbackFailed(InventoryEvent inventoryEvent) {
+        publishEvent("inventoryRollbackFailedTopic", "inventory-rollback-failed-sent", inventoryEvent);
     }
 
-    private void publishEvent(String topic, String observationName, List<Inventory> inventoryList) {
+    private void publishEvent(String topic, String observationName, InventoryEvent inventoryEvent) {
         log.info("Publishing inventory event to '{}'", topic);
 
         try {
             Observation.createNotStarted(observationName, this.observationRegistry).observe(() -> {
-                List<InventoryDto> inventoryDtoList = mapper.toDtoList(inventoryList);
-                InventoryEvent inventoryEvent = InventoryEvent.builder().inventoryList(inventoryDtoList).build();
                 CompletableFuture<SendResult<String, InventoryEvent>> future = kafkaTemplate.send(topic, inventoryEvent);
                 return future.handle((result, throwable) -> CompletableFuture.completedFuture(result));
             });

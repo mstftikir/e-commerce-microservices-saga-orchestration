@@ -13,5 +13,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class PaymentEvent {
 
+    private String eventId;
     private PaymentDto payment;
 }

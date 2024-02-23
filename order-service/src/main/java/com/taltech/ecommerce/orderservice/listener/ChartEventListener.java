@@ -4,7 +4,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
 import com.taltech.ecommerce.orderservice.event.ChartEvent;
-import com.taltech.ecommerce.orderservice.service.OrderEventService;
+import com.taltech.ecommerce.orderservice.service.OrderService;
 
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
@@ -16,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ChartEventListener {
 
-    private final OrderEventService service;
+    private final OrderService service;
     private final ObservationRegistry observationRegistry;
 
     @KafkaListener(topics = "chartDeletedTopic")

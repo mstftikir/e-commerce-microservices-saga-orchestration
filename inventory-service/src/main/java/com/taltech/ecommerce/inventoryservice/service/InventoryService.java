@@ -86,7 +86,7 @@ public class InventoryService {
             foundInventory.setUpdateDate(LocalDateTime.now());
         });
 
-        return repository.saveAll(foundInventoryList);
+        return repository.saveAllAndFlush(foundInventoryList);
     }
 
     private List<Inventory> findByCode(String action, List<Inventory> receivedInventoryList) {

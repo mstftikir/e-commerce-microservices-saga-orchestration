@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.hibernate.exception.GenericJDBCException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -83,15 +82,9 @@ public class PaymentService {
         setPaymentUpdateDates(payment);
 
         try {
-            return repository.save(payment);
+            return repository.saveAndFlush(payment);
         }
         catch (Exception exception) {
-            GenericJDBCException jdbcException = (GenericJDBCException) exception.getCause();
-            // Insert not allowed in readonly transaction
-            if(jdbcException.getSQLState().equals("25006")) {
-                return payment;
-            }
-
             throw new PaymentSaveException(String.format("%s - Payment save failed for userId '%s' and code '%s'",
                 action,
                 payment.getUserId(),

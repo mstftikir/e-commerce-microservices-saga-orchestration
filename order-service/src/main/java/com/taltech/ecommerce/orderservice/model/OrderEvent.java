@@ -1,8 +1,13 @@
 package com.taltech.ecommerce.orderservice.model;
 
+import com.taltech.ecommerce.orderservice.enumeration.EventStatus;
+
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,7 +22,12 @@ import lombok.Setter;
 public class OrderEvent {
     @Id
     private String id;
-    private Long inventoryStatus;
-    private Long chartStatus;
-    private Long paymentStatus;
+    @Version
+    private Long version;
+    @Enumerated(EnumType.ORDINAL)
+    private EventStatus inventoryStatus;
+    @Enumerated(EnumType.ORDINAL)
+    private EventStatus chartStatus;
+    @Enumerated(EnumType.ORDINAL)
+    private EventStatus paymentStatus;
 }

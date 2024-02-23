@@ -8,6 +8,7 @@ import java.util.UUID;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
+import com.taltech.ecommerce.orderservice.enumeration.EventStatus;
 import com.taltech.ecommerce.orderservice.model.Order;
 import com.taltech.ecommerce.orderservice.model.OrderEvent;
 import com.taltech.ecommerce.orderservice.model.OrderItem;
@@ -42,9 +43,11 @@ public class DataLoader implements CommandLineRunner {
             Order order = new Order();
             OrderEvent orderEvent = new OrderEvent();
             orderEvent.setId(UUID.randomUUID().toString());
+            orderEvent.setInventoryStatus(EventStatus.SUCCESSFUL);
             order.setOrderEvent(orderEvent);
             order.setUserId(12345L);
             order.setOrderItems(List.of(orderItem, orderItem2));
+            order.setPaymentCode(UUID.randomUUID().toString());
             order.setTotalPrice(new BigDecimal(1800));
             order.setInsertDate(LocalDateTime.now());
             order.setUpdateDate(LocalDateTime.now());
@@ -68,9 +71,11 @@ public class DataLoader implements CommandLineRunner {
             Order order2 = new Order();
             OrderEvent orderEvent2 = new OrderEvent();
             orderEvent2.setId(UUID.randomUUID().toString());
+            orderEvent2.setInventoryStatus(EventStatus.SUCCESSFUL);
             order2.setOrderEvent(orderEvent2);
             order2.setUserId(67890L);
             order2.setOrderItems(List.of(orderItem3, orderItem4));
+            order2.setPaymentCode(UUID.randomUUID().toString());
             order2.setTotalPrice(new BigDecimal(3600));
             order2.setInsertDate(LocalDateTime.now());
             order2.setUpdateDate(LocalDateTime.now());

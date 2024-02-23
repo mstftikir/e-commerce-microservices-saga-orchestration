@@ -25,12 +25,11 @@ public class OrderController {
     private final OrderMapper mapper;
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public OrderDto placeOrder(@RequestBody OrderDto orderDto) {
+    @ResponseStatus(HttpStatus.OK)
+    public void placeOrder(@RequestBody OrderDto orderDto) {
         log.info("Order request received for userId '{}'", orderDto.getUserId());
 
         Order orderModel = mapper.toModel(orderDto);
-        Order savedOrder = service.placeOrder(orderModel);
-        return mapper.toDto(savedOrder);
+        service.placeOrder(orderModel);
     }
 }

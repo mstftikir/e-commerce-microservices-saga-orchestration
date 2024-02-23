@@ -13,6 +13,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,12 +29,15 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Version
+    private Long version;
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "event_id", referencedColumnName = "id")
     private OrderEvent orderEvent;
     private Long userId;
     @OneToMany(cascade = CascadeType.ALL)
     private List<OrderItem> orderItems;
+    private String paymentCode;
     private BigDecimal totalPrice;
     private LocalDateTime insertDate;
     private LocalDateTime updateDate;

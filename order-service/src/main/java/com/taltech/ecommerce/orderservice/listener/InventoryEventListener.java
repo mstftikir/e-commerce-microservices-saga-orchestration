@@ -21,37 +21,37 @@ public class InventoryEventListener {
 
     @KafkaListener(topics = "inventoryUpdatedTopic")
     public void receiveInventoryUpdated(InventoryEvent inventoryEvent) {
-        Observation.createNotStarted("on-inventory-updated-received", this.observationRegistry)
+        Observation.createNotStarted("inventory-updated-received", this.observationRegistry)
             .observe(() -> {
                 log.info("Inventory updated event received");
-                service.invoiceUpdated(inventoryEvent);
+                service.inventoryUpdated(inventoryEvent);
             });
     }
 
     @KafkaListener(topics = "inventoryUpdateFailedTopic")
     public void receiveInventoryUpdateFailed(InventoryEvent inventoryEvent) {
-        Observation.createNotStarted("on-inventory-update-failed-received", this.observationRegistry)
+        Observation.createNotStarted("inventory-update-failed-received", this.observationRegistry)
             .observe(() -> {
                 log.info("Inventory update failed event received");
-                service.invoiceUpdateFailed(inventoryEvent);
+                service.inventoryUpdateFailed(inventoryEvent);
             });
     }
 
     @KafkaListener(topics = "inventoryRollbackedTopic")
     public void receiveInventoryRollbacked(InventoryEvent inventoryEvent) {
-        Observation.createNotStarted("on-inventory-rollbacked-received", this.observationRegistry)
+        Observation.createNotStarted("inventory-rollbacked-received", this.observationRegistry)
             .observe(() -> {
                 log.info("Inventory rollbacked event received");
-                service.invoiceRollbacked(inventoryEvent);
+                service.inventoryRollbacked(inventoryEvent);
             });
     }
 
     @KafkaListener(topics = "inventoryRollbackFailedTopic")
     public void receiveInventoryRollbackFailed(InventoryEvent inventoryEvent) {
-        Observation.createNotStarted("on-inventory-rollback-failed-received", this.observationRegistry)
+        Observation.createNotStarted("inventory-rollback-failed-received", this.observationRegistry)
             .observe(() -> {
                 log.info("Inventory rollback failed event received");
-                service.invoiceRollbackFailed(inventoryEvent);
+                service.inventoryRollbackFailed(inventoryEvent);
             });
     }
 }

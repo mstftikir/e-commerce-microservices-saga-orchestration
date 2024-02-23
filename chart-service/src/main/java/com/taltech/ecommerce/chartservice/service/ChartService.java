@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.taltech.ecommerce.chartservice.exception.ChartDeleteException;
 import com.taltech.ecommerce.chartservice.model.Chart;
+import com.taltech.ecommerce.chartservice.publisher.ChartEventPublisher;
 import com.taltech.ecommerce.chartservice.repository.ChartRepository;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -19,20 +20,30 @@ import lombok.extern.slf4j.Slf4j;
 public class ChartService {
 
     private final ChartRepository repository;
-
-    @Transactional(readOnly = true)
-    public void prepareDeleteByUserId(Long userId) {
-        updateChart("Prepare", userId);
-    }
+    private final ChartEventPublisher eventPublisher;
 
     @Transactional
     public void commitDeleteByUserId(Long userId) {
-        updateChart("Commit", userId);
+        try {
+            updateChart("Commit", userId);
+            eventPublisher.publishChartDeleted(userId);
+
+        } catch (Exception exception) {
+            log.error("Deleting chart failed with exception message: {}", exception.getMessage());
+            eventPublisher.publishChartDeleteFailed(userId);
+        }
     }
 
     @Transactional
     public void rollbackDeleteByUserId(Long userId) {
-        updateChart("Rollback", userId);
+        try {
+            updateChart("Rollback", userId);
+            eventPublisher.publishChartRollbacked(userId);
+
+        } catch (Exception exception) {
+            log.error("Rollbacking chart failed with exception message: {}", exception.getMessage());
+            eventPublisher.publishChartRollbackFailed(userId);
+        }
     }
 
     private void updateChart(String action, Long userId) {

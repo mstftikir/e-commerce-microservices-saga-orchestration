@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.taltech.ecommerce.orderservice.dto.inventory.InventoryDto;
+import com.taltech.ecommerce.orderservice.event.ChartEvent;
 import com.taltech.ecommerce.orderservice.event.InventoryEvent;
 import com.taltech.ecommerce.orderservice.model.Order;
 import com.taltech.ecommerce.orderservice.publisher.ChartEventPublisher;
@@ -30,8 +31,14 @@ public class OrderEventService {
 
     public Order placeOrder(Order order) {
         publishUpdateInventory(order);
+        publishDeleteChart(order);
 
         return repository.save(order);
+    }
+
+    private void publishDeleteChart(Order order) {
+        ChartEvent chartEvent = ChartEvent.builder().userId(order.getUserId()).build();
+        chartEventPublisher.publishDeleteChart(chartEvent);
     }
 
     private void publishUpdateInventory(Order order) {
@@ -45,19 +52,35 @@ public class OrderEventService {
         inventoryEventPublisher.publishUpdateInventory(inventoryEvent);
     }
 
-    public void invoiceUpdated(InventoryEvent inventoryEvent) {
+    public void inventoryUpdated(InventoryEvent inventoryEvent) {
         log.info("invoiceUpdated {}", inventoryEvent);
     }
 
-    public void invoiceUpdateFailed(InventoryEvent inventoryEvent) {
+    public void inventoryUpdateFailed(InventoryEvent inventoryEvent) {
         log.info("invoiceUpdateFailed {}", inventoryEvent);
     }
 
-    public void invoiceRollbacked(InventoryEvent inventoryEvent) {
+    public void inventoryRollbacked(InventoryEvent inventoryEvent) {
         log.info("invoiceRollbacked {}", inventoryEvent);
     }
 
-    public void invoiceRollbackFailed(InventoryEvent inventoryEvent) {
+    public void inventoryRollbackFailed(InventoryEvent inventoryEvent) {
         log.info("invoiceRollbackFailed {}", inventoryEvent);
+    }
+
+    public void chartDeleted(ChartEvent chartEvent) {
+        log.info("chartDeleted {}", chartEvent);
+    }
+
+    public void chartDeleteFailed(ChartEvent chartEvent) {
+        log.info("chartDeleteFailed {}", chartEvent);
+    }
+
+    public void chartRollbacked(ChartEvent chartEvent) {
+        log.info("chartRollbacked {}", chartEvent);
+    }
+
+    public void chartRollbackFailed(ChartEvent chartEvent) {
+        log.info("chartRollbackFailed {}", chartEvent);
     }
 }

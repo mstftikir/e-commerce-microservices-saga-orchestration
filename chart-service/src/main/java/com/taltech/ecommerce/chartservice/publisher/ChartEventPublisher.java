@@ -1,4 +1,4 @@
-package com.taltech.ecommerce.orderservice.publisher;
+package com.taltech.ecommerce.chartservice.publisher;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -6,7 +6,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Component;
 
-import com.taltech.ecommerce.orderservice.event.ChartEvent;
+import com.taltech.ecommerce.chartservice.event.ChartEvent;
 
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
@@ -18,24 +18,32 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ChartEventPublisher {
 
-
     private final KafkaTemplate<String, ChartEvent> kafkaTemplate;
     private final ObservationRegistry observationRegistry;
 
-    public void publishDeleteChart(ChartEvent event) {
-        publishEvent("deleteChartTopic", "delete-chart-sent", event);
+    public void publishChartDeleted(Long userId) {
+        publishEvent("chartDeletedTopic", "chart-deleted-sent", userId);
     }
 
-    public void publishRollbackChart(ChartEvent event) {
-        publishEvent("rollbackChartTopic", "rollback-chart-sent", event);
+    public void publishChartDeleteFailed(Long userId) {
+        publishEvent("chartDeleteFailedTopic", "chart-delete-failed-sent", userId);
     }
 
-    private void publishEvent(String topic, String observationName, ChartEvent event) {
+    public void publishChartRollbacked(Long userId) {
+        publishEvent("chartRollbackedTopic", "chart-rollbacked-sent", userId);
+    }
+
+    public void publishChartRollbackFailed(Long userId) {
+        publishEvent("chartRollbackFailedTopic", "chart-rollback-failed-sent", userId);
+    }
+
+    private void publishEvent(String topic, String observationName, Long userId) {
         log.info("Publishing chart event to '{}'", topic);
 
         try {
             Observation.createNotStarted(observationName, this.observationRegistry).observe(() -> {
-                CompletableFuture<SendResult<String, ChartEvent>> future = kafkaTemplate.send(topic, event);
+                ChartEvent chartEvent = ChartEvent.builder().userId(userId).build();
+                CompletableFuture<SendResult<String, ChartEvent>> future = kafkaTemplate.send(topic, chartEvent);
                 return future.handle((result, throwable) -> CompletableFuture.completedFuture(result));
             });
         } catch (Exception exception) {

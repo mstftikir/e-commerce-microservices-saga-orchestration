@@ -27,19 +27,19 @@ public class InventoryEventPublisher {
     private final ObservationRegistry observationRegistry;
 
     public void publishInventoryUpdated(List<Inventory> inventoryList) {
-        publishEvent("inventoryUpdatedTopic", "inventory-updated-received", inventoryList);
+        publishEvent("inventoryUpdatedTopic", "inventory-updated-sent", inventoryList);
     }
 
     public void publishInventoryUpdateFailed(List<Inventory> inventoryList) {
-        publishEvent("inventoryUpdateFailedTopic", "inventory-update-failed-received", inventoryList);
+        publishEvent("inventoryUpdateFailedTopic", "inventory-update-failed-sent", inventoryList);
     }
 
     public void publishInventoryRollbacked(List<Inventory> inventoryList) {
-        publishEvent("inventoryRollbackedTopic", "inventory-rollbacked-received", inventoryList);
+        publishEvent("inventoryRollbackedTopic", "inventory-rollbacked-sent", inventoryList);
     }
 
     public void publishInventoryRollbackFailed(List<Inventory> inventoryList) {
-        publishEvent("inventoryRollbackFailedTopic", "inventory-rollback-failed-received", inventoryList);
+        publishEvent("inventoryRollbackFailedTopic", "inventory-rollback-failed-sent", inventoryList);
     }
 
     private void publishEvent(String topic, String observationName, List<Inventory> inventoryList) {

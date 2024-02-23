@@ -1,14 +1,19 @@
 package com.taltech.ecommerce.orderservice.service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.taltech.ecommerce.orderservice.dto.inventory.InventoryDto;
+import com.taltech.ecommerce.orderservice.dto.payment.PaymentDto;
+import com.taltech.ecommerce.orderservice.dto.payment.PaymentItemDto;
 import com.taltech.ecommerce.orderservice.event.ChartEvent;
 import com.taltech.ecommerce.orderservice.event.InventoryEvent;
+import com.taltech.ecommerce.orderservice.event.PaymentEvent;
 import com.taltech.ecommerce.orderservice.model.Order;
 import com.taltech.ecommerce.orderservice.publisher.ChartEventPublisher;
 import com.taltech.ecommerce.orderservice.publisher.InventoryEventPublisher;
@@ -32,13 +37,10 @@ public class OrderEventService {
     public Order placeOrder(Order order) {
         publishUpdateInventory(order);
         publishDeleteChart(order);
+        publishSavePayment(order);
 
+        addDates(order);
         return repository.save(order);
-    }
-
-    private void publishDeleteChart(Order order) {
-        ChartEvent chartEvent = ChartEvent.builder().userId(order.getUserId()).build();
-        chartEventPublisher.publishDeleteChart(chartEvent);
     }
 
     private void publishUpdateInventory(Order order) {
@@ -50,6 +52,37 @@ public class OrderEventService {
         );
         InventoryEvent inventoryEvent = InventoryEvent.builder().inventoryList(inventoryDtoList).build();
         inventoryEventPublisher.publishUpdateInventory(inventoryEvent);
+    }
+
+    private void publishDeleteChart(Order order) {
+        ChartEvent chartEvent = ChartEvent.builder().userId(order.getUserId()).build();
+        chartEventPublisher.publishDeleteChart(chartEvent);
+    }
+
+    private void publishSavePayment(Order order) {
+        List<PaymentItemDto> paymentItemDtos = new ArrayList<>();
+        order.getOrderItems().forEach(orderItem -> paymentItemDtos.add(PaymentItemDto.builder()
+            .inventoryCode(orderItem.getInventoryCode())
+            .quantity(orderItem.getQuantity())
+            .price(orderItem.getPrice())
+            .build()));
+        PaymentDto paymentDto = PaymentDto.builder()
+            .code(UUID.randomUUID().toString())
+            .userId(order.getUserId())
+            .paymentItems(paymentItemDtos)
+            .build();
+        PaymentEvent paymentEvent = PaymentEvent.builder().payment(paymentDto).build();
+        paymentEventPublisher.publishSavePayment(paymentEvent);
+    }
+
+    private void addDates(Order order) {
+        order.setInsertDate(LocalDateTime.now());
+        order.setUpdateDate(LocalDateTime.now());
+
+        order.getOrderItems().forEach(paymentItem -> {
+            paymentItem.setInsertDate(LocalDateTime.now());
+            paymentItem.setUpdateDate(LocalDateTime.now());
+        });
     }
 
     public void inventoryUpdated(InventoryEvent inventoryEvent) {
@@ -82,5 +115,23 @@ public class OrderEventService {
 
     public void chartRollbackFailed(ChartEvent chartEvent) {
         log.info("chartRollbackFailed {}", chartEvent);
+    }
+
+    public void paymentSaved(PaymentEvent paymentEvent) {
+        log.info("chartRollbackFailed {}", paymentEvent);
+    }
+
+    public void paymentSaveFailed(PaymentEvent paymentEvent) {
+        log.info("paymentSaveFailed {}", paymentEvent);
+
+    }
+
+    public void paymentRollbacked(PaymentEvent paymentEvent) {
+        log.info("paymentRollbacked {}", paymentEvent);
+
+    }
+
+    public void paymentRollbackFailed(PaymentEvent paymentEvent) {
+        log.info("paymentRollbackFailed {}", paymentEvent);
     }
 }

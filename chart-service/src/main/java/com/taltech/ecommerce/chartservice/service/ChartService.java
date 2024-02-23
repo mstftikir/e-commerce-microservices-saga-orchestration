@@ -16,13 +16,13 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 @Slf4j
 public class ChartService {
 
     private final ChartRepository repository;
     private final ChartEventPublisher eventPublisher;
 
-    @Transactional
     public void commitDeleteByUserId(Long userId) {
         try {
             updateChart("Commit", userId);
@@ -34,7 +34,6 @@ public class ChartService {
         }
     }
 
-    @Transactional
     public void rollbackDeleteByUserId(Long userId) {
         try {
             updateChart("Rollback", userId);

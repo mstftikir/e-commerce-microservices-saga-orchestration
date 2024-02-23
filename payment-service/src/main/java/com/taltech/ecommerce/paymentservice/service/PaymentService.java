@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.taltech.ecommerce.paymentservice.exception.PaymentSaveException;
 import com.taltech.ecommerce.paymentservice.model.Payment;
+import com.taltech.ecommerce.paymentservice.publisher.PaymentEventPublisher;
 import com.taltech.ecommerce.paymentservice.repository.PaymentRepository;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -18,24 +19,33 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 @Slf4j
 public class PaymentService {
 
     private final PaymentRepository repository;
+    private final PaymentEventPublisher eventPublisher;
 
-    @Transactional(readOnly = true)
-    public Payment prepareSave(Payment payment) {
-        return savePayment("Prepare", payment);
+    public void commitSave(Payment payment) {
+        try {
+            Payment savedPayment = savePayment("Commit", payment);
+            eventPublisher.publishPaymentSaved(savedPayment);
+
+        } catch (Exception exception) {
+            log.error("Saving payment failed with exception message: {}", exception.getMessage());
+            eventPublisher.publishPaymentSaveFailed(payment);
+        }
     }
 
-    @Transactional
-    public Payment commitSave(Payment payment) {
-        return savePayment("Commit", payment);
-    }
+    public void rollbackSave(Payment payment) {
+        try {
+            Payment savedPayment = savePayment("Rollback", payment);
+            eventPublisher.publishPaymentRollbacked(savedPayment);
 
-    @Transactional
-    public Payment rollbackSave(Payment payment) {
-        return savePayment("Rollback", payment);
+        } catch (Exception exception) {
+            log.error("Rollbacking payment failed with exception message: {}", exception.getMessage());
+            eventPublisher.publishPaymentRollbackFailed(payment);
+        }
     }
 
     private Payment savePayment(String action, Payment payment) {

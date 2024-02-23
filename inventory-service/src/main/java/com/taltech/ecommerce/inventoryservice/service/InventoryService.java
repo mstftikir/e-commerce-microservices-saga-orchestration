@@ -17,13 +17,13 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 @Slf4j
 public class InventoryService {
 
     private final InventoryRepository repository;
     private final InventoryEventPublisher eventPublisher;
 
-    @Transactional
     public void commitUpdate(List<Inventory> inventoryList) {
         try {
             List<Inventory> updatedInventoryList = updateInventories("Commit", inventoryList);
@@ -35,7 +35,6 @@ public class InventoryService {
         }
     }
 
-    @Transactional
     public void rollbackUpdate(List<Inventory> inventoryList) {
         try {
             List<Inventory> updatedInventoryList = updateInventories("Rollback", inventoryList);

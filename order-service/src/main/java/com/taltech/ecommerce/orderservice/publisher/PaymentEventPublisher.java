@@ -22,11 +22,19 @@ public class PaymentEventPublisher {
     private final KafkaTemplate<String, PaymentEvent> kafkaTemplate;
     private final ObservationRegistry observationRegistry;
 
-    public void publishEvent(String topic, PaymentEvent event) {
+    public void publishSavePayment(PaymentEvent event) {
+        publishEvent("savePaymentTopic", "save-payment-sent", event);
+    }
+
+    public void publishRollbackPayment(PaymentEvent event) {
+        publishEvent("rollbackPaymentTopic", "rollback-payment-sent", event);
+    }
+
+    private void publishEvent(String topic, String observationName, PaymentEvent event) {
         log.info("Publishing payment event to '{}'", topic);
 
         try {
-            Observation.createNotStarted(topic, this.observationRegistry).observe(() -> {
+            Observation.createNotStarted(observationName, this.observationRegistry).observe(() -> {
                 CompletableFuture<SendResult<String, PaymentEvent>> future = kafkaTemplate.send(topic, event);
                 return future.handle((result, throwable) -> CompletableFuture.completedFuture(result));
             });

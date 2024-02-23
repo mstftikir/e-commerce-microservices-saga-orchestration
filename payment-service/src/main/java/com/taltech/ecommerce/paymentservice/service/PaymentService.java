@@ -8,7 +8,10 @@ import org.hibernate.exception.GenericJDBCException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.taltech.ecommerce.paymentservice.dto.PaymentDto;
+import com.taltech.ecommerce.paymentservice.event.PaymentEvent;
 import com.taltech.ecommerce.paymentservice.exception.PaymentSaveException;
+import com.taltech.ecommerce.paymentservice.mapper.PaymentMapper;
 import com.taltech.ecommerce.paymentservice.model.Payment;
 import com.taltech.ecommerce.paymentservice.publisher.PaymentEventPublisher;
 import com.taltech.ecommerce.paymentservice.repository.PaymentRepository;
@@ -24,27 +27,34 @@ import lombok.extern.slf4j.Slf4j;
 public class PaymentService {
 
     private final PaymentRepository repository;
+    private final PaymentMapper mapper;
     private final PaymentEventPublisher eventPublisher;
 
-    public void commitSave(Payment payment) {
+    public void commitSave(PaymentEvent paymentEvent) {
+        Payment payment = mapper.toModel(paymentEvent.getPayment());
         try {
             Payment savedPayment = savePayment("Commit", payment);
-            eventPublisher.publishPaymentSaved(savedPayment);
+            PaymentDto savedPaymentDto = mapper.toDto(savedPayment);
+            paymentEvent.setPayment(savedPaymentDto);
+            eventPublisher.publishPaymentSaved(paymentEvent);
 
         } catch (Exception exception) {
             log.error("Saving payment failed with exception message: {}", exception.getMessage());
-            eventPublisher.publishPaymentSaveFailed(payment);
+            eventPublisher.publishPaymentSaveFailed(paymentEvent);
         }
     }
 
-    public void rollbackSave(Payment payment) {
+    public void rollbackSave(PaymentEvent paymentEvent) {
+        Payment payment = mapper.toModel(paymentEvent.getPayment());
         try {
             Payment savedPayment = savePayment("Rollback", payment);
-            eventPublisher.publishPaymentRollbacked(savedPayment);
+            PaymentDto savedPaymentDto = mapper.toDto(savedPayment);
+            paymentEvent.setPayment(savedPaymentDto);
+            eventPublisher.publishPaymentRollbacked(paymentEvent);
 
         } catch (Exception exception) {
             log.error("Rollbacking payment failed with exception message: {}", exception.getMessage());
-            eventPublisher.publishPaymentRollbackFailed(payment);
+            eventPublisher.publishPaymentRollbackFailed(paymentEvent);
         }
     }
 

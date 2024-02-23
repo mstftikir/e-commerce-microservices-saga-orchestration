@@ -101,51 +101,63 @@ public class OrderService {
 
     public void inventoryUpdated(InventoryEvent inventoryEvent) {
         log.info("invoiceUpdated {}", inventoryEvent);
+        //Save inv updated by id
     }
 
     public void inventoryUpdateFailed(InventoryEvent inventoryEvent) {
         log.info("invoiceUpdateFailed {}", inventoryEvent);
+        //call rollbacks
     }
 
     public void inventoryRollbacked(InventoryEvent inventoryEvent) {
         log.info("invoiceRollbacked {}", inventoryEvent);
+        //save as rollbacked
     }
 
     public void inventoryRollbackFailed(InventoryEvent inventoryEvent) {
         log.info("invoiceRollbackFailed {}", inventoryEvent);
+        //call rollback again
     }
 
     public void chartDeleted(ChartEvent chartEvent) {
         log.info("chartDeleted {}", chartEvent);
+        //Save chart deleted by id
     }
 
     public void chartDeleteFailed(ChartEvent chartEvent) {
         log.info("chartDeleteFailed {}", chartEvent);
+        //call rollbacks
     }
 
     public void chartRollbacked(ChartEvent chartEvent) {
         log.info("chartRollbacked {}", chartEvent);
+        //save as rollbacked
     }
 
     public void chartRollbackFailed(ChartEvent chartEvent) {
         log.info("chartRollbackFailed {}", chartEvent);
+        //call rollback again
     }
 
     public void paymentSaved(PaymentEvent paymentEvent) {
         log.info("chartRollbackFailed {}", paymentEvent);
+        //Save payment saved by id
     }
 
     public void paymentSaveFailed(PaymentEvent paymentEvent) {
         log.info("paymentSaveFailed {}", paymentEvent);
+        //call rollbacks
 
     }
 
     public void paymentRollbacked(PaymentEvent paymentEvent) {
         log.info("paymentRollbacked {}", paymentEvent);
+        //save as rollbacked
 
     }
 
     public void paymentRollbackFailed(PaymentEvent paymentEvent) {
         log.info("paymentRollbackFailed {}", paymentEvent);
+        //call rollback again
     }
 }

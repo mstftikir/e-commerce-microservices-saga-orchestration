@@ -142,6 +142,7 @@ public class OrderService {
     public void paymentSaved(PaymentEvent paymentEvent) {
         log.info("chartRollbackFailed {}", paymentEvent);
         //Save payment saved by id
+        //Save total amount to order table
     }
 
     public void paymentSaveFailed(PaymentEvent paymentEvent) {

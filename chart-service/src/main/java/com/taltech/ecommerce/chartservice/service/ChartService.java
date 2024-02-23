@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.taltech.ecommerce.chartservice.event.ChartEvent;
 import com.taltech.ecommerce.chartservice.exception.ChartDeleteException;
 import com.taltech.ecommerce.chartservice.model.Chart;
 import com.taltech.ecommerce.chartservice.publisher.ChartEventPublisher;
@@ -23,25 +24,25 @@ public class ChartService {
     private final ChartRepository repository;
     private final ChartEventPublisher eventPublisher;
 
-    public void commitDeleteByUserId(Long userId) {
+    public void commitDelete(ChartEvent chartEvent) {
         try {
-            updateChart("Commit", userId);
-            eventPublisher.publishChartDeleted(userId);
+            updateChart("Commit", chartEvent.getUserId());
+            eventPublisher.publishChartDeleted(chartEvent);
 
         } catch (Exception exception) {
             log.error("Deleting chart failed with exception message: {}", exception.getMessage());
-            eventPublisher.publishChartDeleteFailed(userId);
+            eventPublisher.publishChartDeleteFailed(chartEvent);
         }
     }
 
-    public void rollbackDeleteByUserId(Long userId) {
+    public void rollbackDelete(ChartEvent chartEvent) {
         try {
-            updateChart("Rollback", userId);
-            eventPublisher.publishChartRollbacked(userId);
+            updateChart("Rollback", chartEvent.getUserId());
+            eventPublisher.publishChartRollbacked(chartEvent);
 
         } catch (Exception exception) {
             log.error("Rollbacking chart failed with exception message: {}", exception.getMessage());
-            eventPublisher.publishChartRollbackFailed(userId);
+            eventPublisher.publishChartRollbackFailed(chartEvent);
         }
     }
 

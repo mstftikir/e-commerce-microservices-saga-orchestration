@@ -21,28 +21,27 @@ public class ChartEventPublisher {
     private final KafkaTemplate<String, ChartEvent> kafkaTemplate;
     private final ObservationRegistry observationRegistry;
 
-    public void publishChartDeleted(Long userId) {
-        publishEvent("chartDeletedTopic", "chart-deleted-sent", userId);
+    public void publishChartDeleted(ChartEvent chartEvent) {
+        publishEvent("chartDeletedTopic", "chart-deleted-sent", chartEvent);
     }
 
-    public void publishChartDeleteFailed(Long userId) {
-        publishEvent("chartDeleteFailedTopic", "chart-delete-failed-sent", userId);
+    public void publishChartDeleteFailed(ChartEvent chartEvent) {
+        publishEvent("chartDeleteFailedTopic", "chart-delete-failed-sent", chartEvent);
     }
 
-    public void publishChartRollbacked(Long userId) {
-        publishEvent("chartRollbackedTopic", "chart-rollbacked-sent", userId);
+    public void publishChartRollbacked(ChartEvent chartEvent) {
+        publishEvent("chartRollbackedTopic", "chart-rollbacked-sent", chartEvent);
     }
 
-    public void publishChartRollbackFailed(Long userId) {
-        publishEvent("chartRollbackFailedTopic", "chart-rollback-failed-sent", userId);
+    public void publishChartRollbackFailed(ChartEvent chartEvent) {
+        publishEvent("chartRollbackFailedTopic", "chart-rollback-failed-sent", chartEvent);
     }
 
-    private void publishEvent(String topic, String observationName, Long userId) {
+    private void publishEvent(String topic, String observationName, ChartEvent chartEvent) {
         log.info("Publishing chart event to '{}'", topic);
 
         try {
             Observation.createNotStarted(observationName, this.observationRegistry).observe(() -> {
-                ChartEvent chartEvent = ChartEvent.builder().userId(userId).build();
                 CompletableFuture<SendResult<String, ChartEvent>> future = kafkaTemplate.send(topic, chartEvent);
                 return future.handle((result, throwable) -> CompletableFuture.completedFuture(result));
             });

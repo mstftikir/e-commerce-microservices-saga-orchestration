@@ -21,11 +21,19 @@ public class InventoryEventPublisher {
     private final KafkaTemplate<String, InventoryEvent> kafkaTemplate;
     private final ObservationRegistry observationRegistry;
 
-    public void publishEvent(String topic, InventoryEvent event) {
+    public void publishUpdateInventory(InventoryEvent event) {
+        publishEvent("updateInventoryTopic", "update-inventory-sent", event);
+    }
+
+    public void publishRollbackInventory(InventoryEvent event) {
+        publishEvent("rollbackInventoryTopic", "rollback-inventory-sent", event);
+    }
+
+    private void publishEvent(String topic, String observationName, InventoryEvent event) {
         log.info("Publishing inventory event to '{}'", topic);
 
         try {
-            Observation.createNotStarted(topic, this.observationRegistry).observe(() -> {
+            Observation.createNotStarted(observationName, this.observationRegistry).observe(() -> {
                 CompletableFuture<SendResult<String, InventoryEvent>> future = kafkaTemplate.send(topic, event);
                 return future.handle((result, throwable) -> CompletableFuture.completedFuture(result));
             });
@@ -33,4 +41,5 @@ public class InventoryEventPublisher {
             log.error("Exception occurred while sending message to kafka, exception message: {}", exception.getMessage());
         }
     }
+
 }

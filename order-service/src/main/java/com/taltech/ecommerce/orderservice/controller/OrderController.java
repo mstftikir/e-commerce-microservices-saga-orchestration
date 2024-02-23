@@ -1,7 +1,6 @@
 package com.taltech.ecommerce.orderservice.controller;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.taltech.ecommerce.orderservice.dto.OrderDto;
 import com.taltech.ecommerce.orderservice.mapper.OrderMapper;
 import com.taltech.ecommerce.orderservice.model.Order;
+import com.taltech.ecommerce.orderservice.service.OrderEventService;
 import com.taltech.ecommerce.orderservice.service.OrderService;
 
 import lombok.RequiredArgsConstructor;
@@ -23,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 public class OrderController {
 
     private final OrderService service;
+    private final OrderEventService eventService;
     private final OrderMapper mapper;
 
     @PostMapping
@@ -35,15 +36,13 @@ public class OrderController {
         return mapper.toDto(savedOrder);
     }
 
-    @GetMapping("/main")
-    @ResponseStatus(HttpStatus.OK)
-    public void testMainTopics() {
-        service.testMainTopics();
-    }
+    @PostMapping("/event")
+    @ResponseStatus(HttpStatus.CREATED)
+    public OrderDto placeOrderEvent(@RequestBody OrderDto orderDto) {
+        log.info("Order request received for userId '{}', starting the events...", orderDto.getUserId());
 
-    @GetMapping("/rollback")
-    @ResponseStatus(HttpStatus.OK)
-    public void testRollbackTopics() {
-        service.testRollbackTopics();
+        Order orderModel = mapper.toModel(orderDto);
+        Order savedOrder = eventService.placeOrder(orderModel);
+        return mapper.toDto(savedOrder);
     }
 }

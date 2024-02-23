@@ -4,7 +4,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
 import com.taltech.ecommerce.orderservice.event.InventoryEvent;
-import com.taltech.ecommerce.orderservice.service.OrderService;
+import com.taltech.ecommerce.orderservice.service.OrderEventService;
 
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
@@ -16,12 +16,12 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class InventoryEventListener {
 
-    private final OrderService service;
+    private final OrderEventService service;
     private final ObservationRegistry observationRegistry;
 
     @KafkaListener(topics = "inventoryUpdatedTopic")
-    public void receiveInventoryUpdatedEvent(InventoryEvent inventoryEvent) {
-        Observation.createNotStarted("on-inventory-updated-event-received", this.observationRegistry)
+    public void receiveInventoryUpdated(InventoryEvent inventoryEvent) {
+        Observation.createNotStarted("on-inventory-updated-received", this.observationRegistry)
             .observe(() -> {
                 log.info("Inventory updated event received");
                 service.invoiceUpdated(inventoryEvent);
@@ -29,8 +29,8 @@ public class InventoryEventListener {
     }
 
     @KafkaListener(topics = "inventoryUpdateFailedTopic")
-    public void receiveInventoryUpdateFailedEvent(InventoryEvent inventoryEvent) {
-        Observation.createNotStarted("on-inventory-update-failed-event-received", this.observationRegistry)
+    public void receiveInventoryUpdateFailed(InventoryEvent inventoryEvent) {
+        Observation.createNotStarted("on-inventory-update-failed-received", this.observationRegistry)
             .observe(() -> {
                 log.info("Inventory update failed event received");
                 service.invoiceUpdateFailed(inventoryEvent);
@@ -38,8 +38,8 @@ public class InventoryEventListener {
     }
 
     @KafkaListener(topics = "inventoryRollbackedTopic")
-    public void receiveInventoryRollbackedEvent(InventoryEvent inventoryEvent) {
-        Observation.createNotStarted("on-inventory-rollbacked-event-received", this.observationRegistry)
+    public void receiveInventoryRollbacked(InventoryEvent inventoryEvent) {
+        Observation.createNotStarted("on-inventory-rollbacked-received", this.observationRegistry)
             .observe(() -> {
                 log.info("Inventory rollbacked event received");
                 service.invoiceRollbacked(inventoryEvent);
@@ -47,8 +47,8 @@ public class InventoryEventListener {
     }
 
     @KafkaListener(topics = "inventoryRollbackFailedTopic")
-    public void receiveInventoryRollbackFailedEvent(InventoryEvent inventoryEvent) {
-        Observation.createNotStarted("on-inventory-rollback-failed-event-received", this.observationRegistry)
+    public void receiveInventoryRollbackFailed(InventoryEvent inventoryEvent) {
+        Observation.createNotStarted("on-inventory-rollback-failed-received", this.observationRegistry)
             .observe(() -> {
                 log.info("Inventory rollback failed event received");
                 service.invoiceRollbackFailed(inventoryEvent);

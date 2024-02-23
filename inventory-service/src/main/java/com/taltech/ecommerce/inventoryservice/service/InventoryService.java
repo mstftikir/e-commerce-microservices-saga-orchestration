@@ -27,11 +27,11 @@ public class InventoryService {
     public void commitUpdate(List<Inventory> inventoryList) {
         try {
             List<Inventory> updatedInventoryList = updateInventories("Commit", inventoryList);
-            eventPublisher.publishEvent("inventoryUpdatedTopic", updatedInventoryList);
+            eventPublisher.publishInventoryUpdated(updatedInventoryList);
         }
         catch (Exception exception) {
             log.error("Updating inventory failed with exception message: {}", exception.getMessage());
-            eventPublisher.publishEvent("inventoryUpdateFailedTopic", inventoryList);
+            eventPublisher.publishInventoryUpdateFailed(inventoryList);
         }
     }
 
@@ -39,11 +39,11 @@ public class InventoryService {
     public void rollbackUpdate(List<Inventory> inventoryList) {
         try {
             List<Inventory> updatedInventoryList = updateInventories("Rollback", inventoryList);
-            eventPublisher.publishEvent("inventoryRollbackedTopic", updatedInventoryList);
+            eventPublisher.publishInventoryRollbacked(updatedInventoryList);
         }
         catch (Exception exception) {
             log.error("Rollbacking inventory failed with exception message: {}", exception.getMessage());
-            eventPublisher.publishEvent("inventoryRollbackFailedTopic", inventoryList);
+            eventPublisher.publishInventoryRollbackFailed(inventoryList);
         }
     }
 

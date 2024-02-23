@@ -25,8 +25,8 @@ public class InventoryEventListener {
     private final ObservationRegistry observationRegistry;
 
     @KafkaListener(topics = "updateInventoryTopic")
-    public void receiveUpdateInventoryEvent(InventoryEvent inventoryEvent) {
-        Observation.createNotStarted("on-update-inventory-event-received", this.observationRegistry)
+    public void receiveUpdateInventory(InventoryEvent inventoryEvent) {
+        Observation.createNotStarted("update-inventory-received", this.observationRegistry)
             .observe(() -> {
                 log.info("Update inventory event received");
                 List<Inventory> inventoryList = mapper.toModelList(inventoryEvent.getInventoryList());
@@ -35,8 +35,8 @@ public class InventoryEventListener {
     }
 
     @KafkaListener(topics = "rollbackInventoryTopic")
-    public void receiveRollbackInventoryEvent(InventoryEvent inventoryEvent) {
-        Observation.createNotStarted("on-rollback-inventory-event-received", this.observationRegistry)
+    public void receiveRollbackInventory(InventoryEvent inventoryEvent) {
+        Observation.createNotStarted("rollback-inventory-received", this.observationRegistry)
             .observe(() -> {
                 log.info("Rollback inventory event received");
                 List<Inventory> inventoryList = mapper.toModelList(inventoryEvent.getInventoryList());

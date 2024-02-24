@@ -23,7 +23,7 @@ public class ChartEventListener {
     public void receiveChartDeleted(ChartEvent chartEvent) {
         Observation.createNotStarted("chart-deleted-received", this.observationRegistry)
             .observe(() -> {
-                log.info("Chart updated event received");
+                log.info("Chart deleted event received");
                 service.chartDeleted(chartEvent);
             });
     }

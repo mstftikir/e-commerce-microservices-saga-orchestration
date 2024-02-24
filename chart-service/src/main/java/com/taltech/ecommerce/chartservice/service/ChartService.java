@@ -28,7 +28,6 @@ public class ChartService {
         try {
             updateChart("Commit", chartEvent.getUserId());
             eventPublisher.publishChartDeleted(chartEvent);
-
         } catch (Exception exception) {
             log.error("Deleting chart failed with exception message: {}", exception.getMessage());
             eventPublisher.publishChartDeleteFailed(chartEvent);
@@ -39,7 +38,6 @@ public class ChartService {
         try {
             updateChart("Rollback", chartEvent.getUserId());
             eventPublisher.publishChartRollbacked(chartEvent);
-
         } catch (Exception exception) {
             log.error("Rollbacking chart failed with exception message: {}", exception.getMessage());
             eventPublisher.publishChartRollbackFailed(chartEvent);

@@ -36,7 +36,6 @@ public class PaymentService {
             PaymentDto savedPaymentDto = mapper.toDto(savedPayment);
             paymentEvent.setPayment(savedPaymentDto);
             eventPublisher.publishPaymentSaved(paymentEvent);
-
         } catch (Exception exception) {
             log.error("Saving payment failed with exception message: {}", exception.getMessage());
             eventPublisher.publishPaymentSaveFailed(paymentEvent);

@@ -47,9 +47,9 @@ public class OrderService {
     private final ChartEventPublisher chartEventPublisher;
     private final PaymentEventPublisher paymentEventPublisher;
 
-
     @Value("${user.service.url}")
     private String userServiceUrl;
+
     public void placeOrder(Order order) {
         validations(order);
 

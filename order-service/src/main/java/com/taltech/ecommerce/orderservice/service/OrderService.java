@@ -223,7 +223,6 @@ public class OrderService {
         PaymentEvent paymentEvent = getPaymentEvent(order);
         paymentEventPublisher.publishRollbackPayment(paymentEvent);
     }
-
     private PaymentEvent getPaymentEvent(Order order) {
         String paymentCode = order.getPaymentCode() == null
             ? UUID.randomUUID().toString()

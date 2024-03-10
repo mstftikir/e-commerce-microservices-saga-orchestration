@@ -69,12 +69,14 @@ public class OrderService {
     public void inventoryUpdated(InventoryEvent inventoryEvent) {
         Order order = findOrderByEventId(inventoryEvent.getEventId());
         order.getOrderEvent().setInventoryStatus(EventStatus.SUCCESSFUL);
+        order.setUpdateDate(LocalDateTime.now());
         repository.saveAndFlush(order);
     }
 
     public void inventoryUpdateFailed(InventoryEvent inventoryEvent) {
         Order order = findOrderByEventId(inventoryEvent.getEventId());
         order.getOrderEvent().setInventoryStatus(EventStatus.FAILED);
+        order.setUpdateDate(LocalDateTime.now());
         repository.saveAndFlush(order);
 
         log.info("Publishing rollbackChart and rollbackPayment events");
@@ -85,24 +87,28 @@ public class OrderService {
     public void inventoryRollbacked(InventoryEvent inventoryEvent) {
         Order order = findOrderByEventId(inventoryEvent.getEventId());
         order.getOrderEvent().setInventoryStatus(EventStatus.ROLLBACK);
+        order.setUpdateDate(LocalDateTime.now());
         repository.saveAndFlush(order);
     }
 
     public void inventoryRollbackFailed(InventoryEvent inventoryEvent) {
         Order order = findOrderByEventId(inventoryEvent.getEventId());
         order.getOrderEvent().setInventoryStatus(EventStatus.ROLLBACK_FAILED);
+        order.setUpdateDate(LocalDateTime.now());
         repository.saveAndFlush(order);
     }
 
     public void chartDeleted(ChartEvent chartEvent) {
         Order order = findOrderByEventId(chartEvent.getEventId());
         order.getOrderEvent().setChartStatus(EventStatus.SUCCESSFUL);
+        order.setUpdateDate(LocalDateTime.now());
         repository.saveAndFlush(order);
     }
 
     public void chartDeleteFailed(ChartEvent chartEvent) {
         Order order = findOrderByEventId(chartEvent.getEventId());
         order.getOrderEvent().setChartStatus(EventStatus.FAILED);
+        order.setUpdateDate(LocalDateTime.now());
         repository.saveAndFlush(order);
 
         log.info("Publishing rollbackInventory and rollbackPayment events");
@@ -113,12 +119,14 @@ public class OrderService {
     public void chartRollbacked(ChartEvent chartEvent) {
         Order order = findOrderByEventId(chartEvent.getEventId());
         order.getOrderEvent().setChartStatus(EventStatus.ROLLBACK);
+        order.setUpdateDate(LocalDateTime.now());
         repository.saveAndFlush(order);
     }
 
     public void chartRollbackFailed(ChartEvent chartEvent) {
         Order order = findOrderByEventId(chartEvent.getEventId());
         order.getOrderEvent().setChartStatus(EventStatus.ROLLBACK_FAILED);
+        order.setUpdateDate(LocalDateTime.now());
         repository.saveAndFlush(order);
     }
 
@@ -127,12 +135,14 @@ public class OrderService {
         order.getOrderEvent().setPaymentStatus(EventStatus.SUCCESSFUL);
         order.setPaymentCode(paymentEvent.getPayment().getCode());
         order.setTotalPrice(paymentEvent.getPayment().getTotalPrice());
+        order.setUpdateDate(LocalDateTime.now());
         repository.saveAndFlush(order);
     }
 
     public void paymentSaveFailed(PaymentEvent paymentEvent) {
         Order order = findOrderByEventId(paymentEvent.getEventId());
         order.getOrderEvent().setPaymentStatus(EventStatus.FAILED);
+        order.setUpdateDate(LocalDateTime.now());
         repository.saveAndFlush(order);
 
         log.info("Publishing rollbackInventory and rollbackChart events");
@@ -144,6 +154,7 @@ public class OrderService {
     public void paymentRollbacked(PaymentEvent paymentEvent) {
         Order order = findOrderByEventId(paymentEvent.getEventId());
         order.getOrderEvent().setPaymentStatus(EventStatus.ROLLBACK);
+        order.setUpdateDate(LocalDateTime.now());
         repository.saveAndFlush(order);
 
     }
@@ -151,6 +162,7 @@ public class OrderService {
     public void paymentRollbackFailed(PaymentEvent paymentEvent) {
         Order order = findOrderByEventId(paymentEvent.getEventId());
         order.getOrderEvent().setPaymentStatus(EventStatus.ROLLBACK_FAILED);
+        order.setUpdateDate(LocalDateTime.now());
         repository.saveAndFlush(order);
     }
 

@@ -60,10 +60,7 @@ public class OrderService {
         addDates(order);
         repository.save(order);
 
-        log.info("Publishing events with eventId '{}'", order.getOrderEvent().getId());
         publishUpdateInventory(order);
-        publishDeleteChart(order);
-        publishSavePayment(order);
     }
 
     public void inventoryUpdated(InventoryEvent inventoryEvent) {
@@ -71,6 +68,8 @@ public class OrderService {
         order.getOrderEvent().setInventoryStatus(EventStatus.SUCCESSFUL);
         order.setUpdateDate(LocalDateTime.now());
         repository.saveAndFlush(order);
+
+        publishDeleteChart(order);
     }
 
     public void inventoryUpdateFailed(InventoryEvent inventoryEvent) {
@@ -78,10 +77,6 @@ public class OrderService {
         order.getOrderEvent().setInventoryStatus(EventStatus.FAILED);
         order.setUpdateDate(LocalDateTime.now());
         repository.saveAndFlush(order);
-
-        log.info("Publishing rollbackChart and rollbackPayment events");
-        publishRollbackChart(order);
-        publishRollbackPayment(order);
     }
 
     public void inventoryRollbacked(InventoryEvent inventoryEvent) {
@@ -103,6 +98,8 @@ public class OrderService {
         order.getOrderEvent().setChartStatus(EventStatus.SUCCESSFUL);
         order.setUpdateDate(LocalDateTime.now());
         repository.saveAndFlush(order);
+
+        publishSavePayment(order);
     }
 
     public void chartDeleteFailed(ChartEvent chartEvent) {
@@ -111,9 +108,7 @@ public class OrderService {
         order.setUpdateDate(LocalDateTime.now());
         repository.saveAndFlush(order);
 
-        log.info("Publishing rollbackInventory and rollbackPayment events");
         publishRollbackInventory(order);
-        publishRollbackPayment(order);
     }
 
     public void chartRollbacked(ChartEvent chartEvent) {
@@ -145,9 +140,8 @@ public class OrderService {
         order.setUpdateDate(LocalDateTime.now());
         repository.saveAndFlush(order);
 
-        log.info("Publishing rollbackInventory and rollbackChart events");
-        publishRollbackInventory(order);
         publishRollbackChart(order);
+        publishRollbackInventory(order);
 
     }
 
@@ -231,10 +225,6 @@ public class OrderService {
         paymentEventPublisher.publishSavePayment(paymentEvent);
     }
 
-    private void publishRollbackPayment(Order order) {
-        PaymentEvent paymentEvent = getPaymentEvent(order);
-        paymentEventPublisher.publishRollbackPayment(paymentEvent);
-    }
     private PaymentEvent getPaymentEvent(Order order) {
         String paymentCode = order.getPaymentCode() == null
             ? UUID.randomUUID().toString()

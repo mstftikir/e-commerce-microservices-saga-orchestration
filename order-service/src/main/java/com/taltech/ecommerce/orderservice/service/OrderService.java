@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -35,7 +34,6 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 @Transactional
-@Retryable
 @Slf4j
 public class OrderService {
 
@@ -116,6 +114,8 @@ public class OrderService {
         order.getOrderEvent().setChartStatus(EventStatus.ROLLBACK);
         order.setUpdateDate(LocalDateTime.now());
         repository.saveAndFlush(order);
+
+        publishRollbackInventory(order);
     }
 
     public void chartRollbackFailed(ChartEvent chartEvent) {
@@ -141,8 +141,6 @@ public class OrderService {
         repository.saveAndFlush(order);
 
         publishRollbackChart(order);
-        publishRollbackInventory(order);
-
     }
 
     public void paymentRollbacked(PaymentEvent paymentEvent) {

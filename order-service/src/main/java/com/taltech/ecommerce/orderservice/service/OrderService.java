@@ -55,6 +55,7 @@ public class OrderService {
         orderEvent.setId(UUID.randomUUID().toString());
         order.setOrderEvent(orderEvent);
 
+        order.setDiscountId(UUID.randomUUID().toString());
         addDates(order);
         repository.save(order);
 
@@ -236,6 +237,7 @@ public class OrderService {
         PaymentDto paymentDto = PaymentDto.builder()
             .code(paymentCode)
             .userId(order.getUserId())
+            .discountId(order.getDiscountId())
             .paymentItems(paymentItemDtos)
             .build();
         return PaymentEvent.builder()

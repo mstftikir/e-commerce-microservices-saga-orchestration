@@ -129,7 +129,6 @@ public class OrderService {
         Order order = findOrderByEventId(paymentEvent.getEventId());
         order.getOrderEvent().setPaymentStatus(EventStatus.SUCCESSFUL);
         order.setPaymentCode(paymentEvent.getPayment().getCode());
-        order.setTotalPrice(paymentEvent.getPayment().getTotalPrice());
         order.setUpdateDate(LocalDateTime.now());
         repository.saveAndFlush(order);
     }
